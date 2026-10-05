@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
 <meta name="theme-color" content="#0a0a0a">
 <title>ODA Shop</title>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 :root{--bg:#09090a;--card:#141416;--card2:#1b1b1e;--line:#2a2a2e;--txt:#f6f4ee;--mut:#9b9a93;--g:#e8b23a;--g2:#b8821a}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
@@ -134,7 +135,7 @@ nav button.on::before{content:"";position:absolute;top:-9px;width:28px;height:3p
 
 <script>
 // ⚠️ À remplacer par le vrai numéro WhatsApp d'ODA Shop (format international, sans +)
-const WA="22700000000";
+let WA="22700000000";
 const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]||null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}},del(k){try{localStorage.removeItem(k)}catch(e){delete mem[k]}}};
@@ -144,7 +145,7 @@ let city=store.get("oda_city")||"Agadez";
 let tab="home",sub="neuf",cat="all",q="",cart=[];
 let chat=[{m:"Bonjour 👋 Bienvenue chez ODA Shop ! Comment pouvons-nous vous aider ?",me:false}];
 
-const prods={
+const demoProds={
 neuf:[
 {n:"Smartphone 128 Go",p:"85 000",e:"📱",c:"Téléphones",g:"#e8b23a,#4a3510"},
 {n:"Écouteurs sans fil",p:"12 000",e:"🎧",c:"Téléphones",g:"#8b5cf6,#2a1856"},
@@ -164,7 +165,7 @@ occ:[
 {n:"Toyota Corolla 2012",p:"3 200 000",e:"🚗",c:"Véhicules",g:"#f43f5e,#4a1020"},
 {n:"Vélo",p:"25 000",e:"🚲",c:"Divers",g:"#84cc16,#2d4a07"}]};
 
-const services=[
+const demoServices=[
 {k:"Section 1",t:"Boutique neuve",s:"Téléphones, ordinateurs, meubles, électroménager neufs",i:"🛍️",go:"home:neuf"},
 {k:"Section 2",t:"Marché occasion",s:"Achetez et vendez des produits d'occasion",i:"🏷️",go:"home:occ"},
 {k:"Section 3",t:"Livraison nourriture",s:"Restaurants d'Agadez livrés chez vous",i:"🍽️",items:[["Restaurant (démo) 1","Plats locaux · 30 min"],["Restaurant (démo) 2","Grillades · 40 min"],["Fast-food (démo)","Burgers, poulet · 25 min"]],cta:"Commander"},
@@ -175,6 +176,30 @@ const services=[
 {k:"Secteur 8",t:"Service colis ODA",s:"Envoyez et récupérez vos colis dans toutes les compagnies à Agadez",i:"📦",items:[["Envoyer un colis","Dépôt chez vous, livraison compagnie"],["Récupérer un colis","On le retire et on vous le livre"]],cta:"Demander"}
 ];
 
+/* ---- Données en direct depuis Supabase (gérées dans ODA Shop Office) ---- */
+const SB_URL="https://zssyuerclbjydkuooukk.supabase.co",SB_KEY="sb_publishable_8JxMf66gzM7B9idXFtTSEg_ddXevxEf";
+const sbc=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
+let prods={neuf:[],occ:[]},services=demoServices,cities=["Agadez","Niamey","Zinder","Maradi","Tahoua","Arlit","Dosso"];
+async function loadRemote(){
+  try{
+    if(!sbc)throw new Error("offline");
+    const [p,s,i,c,st]=await Promise.all([
+      sbc.from("products").select("*").order("created_at",{ascending:false}),
+      sbc.from("services").select("*").order("sort_order"),
+      sbc.from("service_items").select("*").order("sort_order"),
+      sbc.from("cities").select("*").order("sort_order"),
+      sbc.from("settings").select("*")]);
+    if(p.error)throw p.error;
+    const g=["#e8b23a,#4a3510","#38bdf8,#0c3550","#8b5cf6,#2a1856","#22c55e,#0f3d20"],m={neuf:[],occ:[]};
+    p.data.forEach((x,k)=>m[x.section=="neuf"?"neuf":"occ"].push({n:x.name,p:Number(x.price).toLocaleString("fr-FR"),e:"📦",img:x.image_url,c:x.category||"Divers",g:g[k%4]}));
+    prods=m;
+    services=[demoServices[0],demoServices[1],...(s.data||[]).map(x=>({k:x.label,t:x.title,s:x.subtitle||"",i:x.icon||"🧰",cta:x.cta||"Commander",items:(i.data||[]).filter(y=>y.service_id==x.id).map(y=>[y.name,y.description||""])}))];
+    if(c.data&&c.data.length)cities=c.data.map(x=>x.name);
+    const set=Object.fromEntries((st.data||[]).map(x=>[x.key,x.value]));
+    if(set.whatsapp_number)WA=set.whatsapp_number;
+  }catch(e){console.warn(e);prods=demoProds}
+  render();
+}
 const wa=t=>`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
 const who=()=>user?`Client : ${user.name}${user.phone?" ("+user.phone+")":""}\n`:"";
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1700)}
@@ -203,7 +228,7 @@ function home(){
    <div class="hero"><h1>Achetez, vendez,<br><span>on vous livre.</span></h1><p>Livraison à ${esc(city)} · Paiement à la livraison · Commande via WhatsApp</p></div>
    <div class="seg"><button class="${sub=="neuf"?"on":""}" data-s="neuf">Boutique neuve</button><button class="${sub=="occ"?"on":""}" data-s="occ">Marché occasion</button></div>
    <div class="chips">${cats.map(c=>`<button class="chip ${c==cat?"on":""}" data-c="${c}">${c=="all"?"Tout":c}</button>`).join("")}</div>
-   <div class="grid">${f.length?f.map((x,i)=>`<div class="pr"><div class="im" style="background:linear-gradient(135deg,${x.g})">${x.e}</div><div class="in"><small>${sub=="neuf"?"Neuf":"Occasion"} · ${x.c}</small><h3>${x.n}</h3><div class="rw"><span class="price">${x.p} F</span><button class="add" data-n="${esc(x.n)}" data-p="${x.p}">+</button></div></div></div>`).join(""):'<div class="empty">Aucun article trouvé.</div>'}</div>
+   <div class="grid">${f.length?f.map((x,i)=>`<div class="pr"><div class="im" style="background:linear-gradient(135deg,${x.g})">${x.img?`<img src="${esc(x.img)}" alt="" style="width:100%;height:100%;object-fit:cover">`:x.e}</div><div class="in"><small>${sub=="neuf"?"Neuf":"Occasion"} · ${x.c}</small><h3>${x.n}</h3><div class="rw"><span class="price">${x.p} F</span><button class="add" data-n="${esc(x.n)}" data-p="${x.p}">+</button></div></div></div>`).join(""):'<div class="empty">Aucun article trouvé.</div>'}</div>
    <h2>Pourquoi ODA Shop</h2>
    <div class="why"><div><b>Rapide</b><small>Livraison à ${esc(city)}</small></div><div><b>Sûr</b><small>Paiement livraison</small></div><div><b>Simple</b><small>Commande WhatsApp</small></div></div>
    <footer>© 2026 ODA Shop · Livraison à Agadez · Payez et faites-vous livrer<br>Maquette de démonstration — produits et prix fictifs</footer>
@@ -220,7 +245,14 @@ function cartUI(){
 }
 $("#cartbar").onclick=()=>{
   const txt=`Bonjour ODA Shop, je souhaite commander :\n`+cart.map(c=>`• ${c.n} — ${c.p} F`).join("\n")+`\n\n${who()}Ville : ${city}\nPaiement à la livraison.`;
-  openSheet(`<h3>Votre commande</h3><p class="s">Livraison à ${esc(city)} · Paiement à la livraison</p>`+cart.map((c,i)=>`<div class="li"><div>${esc(c.n)}<small>${c.p} F</small></div><button class="go" onclick="rm(${i})">Retirer</button></div>`).join("")+`<a class="btn" href="${wa(txt)}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>`);
+  openSheet(`<h3>Votre commande</h3><p class="s">Livraison à ${esc(city)} · Paiement à la livraison</p>`+cart.map((c,i)=>`<div class="li"><div>${esc(c.n)}<small>${c.p} F</small></div><button class="go" onclick="rm(${i})">Retirer</button></div>`).join("")+`<input class="fld" id="ad" placeholder="Adresse / quartier de livraison"><button class="btn" id="cf">Confirmer la commande</button><a class="btn o" href="${wa(txt)}" target="_blank" rel="noopener">Envoyer aussi sur WhatsApp</a>`);
+  $("#cf").onclick=async()=>{
+    if(!user){closeSheet();authSheet();toast("Créez d'abord votre compte");return}
+    const total=cart.reduce((a,c)=>a+Number(String(c.p).replace(/\D/g,"")),0);
+    const {error}=await sbc.from("orders").insert({customer_name:user.name,customer_phone:user.phone||null,city,address:$("#ad").value.trim()||null,items:cart.map(c=>({n:c.n,p:c.p+" F"})),total,kind:"produit"});
+    if(error){toast("Erreur, réessayez");return}
+    cart=[];cartUI();closeSheet();toast("Commande envoyée ✓");
+  };
 };
 function rm(i){cart.splice(i,1);cartUI();cart.length?$("#cartbar").click():closeSheet()}
 
@@ -263,11 +295,12 @@ $("#menu").onclick=()=>openSheet(`<h3>Menu</h3>
   <div class="li"><div>Nous contacter<small>WhatsApp et appel</small></div><a class="go" target="_blank" rel="noopener" href="${wa("Bonjour ODA Shop")}">WhatsApp</a></div>`);
 document.addEventListener("click",e=>{if(e.target.id=="lo"){user=null;store.del("oda_user");chat=chat.slice(0,1);closeSheet();render()}});
 function citySheet(){
-  openSheet(`<h3>🛵 Commander vers une autre ville</h3><p class="s">Choisissez la ville de livraison.</p>`+["Agadez","Niamey","Zinder","Maradi","Tahoua","Arlit","Dosso"].map(c=>`<div class="li"><div>${c}</div><button class="go" onclick="setCity('${c}')">${c==city?"✓ Choisie":"Choisir"}</button></div>`).join(""));
+  openSheet(`<h3>🛵 Commander vers une autre ville</h3><p class="s">Choisissez la ville de livraison.</p>`+cities.map(c=>`<div class="li"><div>${c}</div><button class="go" onclick="setCity('${c}')">${c==city?"✓ Choisie":"Choisir"}</button></div>`).join(""));
 }
 function setCity(c){city=c;store.set("oda_city",c);closeSheet();render();toast("Ville : "+c)}
 $("#otherCity").onclick=citySheet;
 setTab("home");
+loadRemote();
 </script>
 </body>
 </html>
