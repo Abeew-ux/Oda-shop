@@ -1,0 +1,273 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
+<meta name="theme-color" content="#0a0a0a">
+<title>ODA Shop</title>
+<style>
+:root{--bg:#09090a;--card:#141416;--card2:#1b1b1e;--line:#2a2a2e;--txt:#f6f4ee;--mut:#9b9a93;--g:#e8b23a;--g2:#b8821a}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+body{background:#000;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+#app{max-width:480px;margin:auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:96px}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+/* header */
+header{position:sticky;top:0;z-index:20;background:rgba(9,9,10,.88);backdrop-filter:blur(14px);padding:12px 16px 8px;border-bottom:1px solid var(--line)}
+.hrow{display:flex;align-items:center;gap:10px}
+.logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--g),var(--g2));color:#111;font-weight:900;font-size:10px;line-height:1;display:grid;place-items:center;text-align:center;letter-spacing:-.3px}
+.greet{flex:1;text-align:center}
+.greet b{font-size:15px}.greet b span{color:var(--g)}
+.greet small{display:block;color:var(--mut);font-size:12px}
+.ib{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--g);color:var(--g)}
+.ib.f{background:var(--g);color:#111}
+.ib svg{width:20px;height:20px}
+.cityrow{display:flex;justify-content:space-between;align-items:center;margin-top:10px;font-size:13px}
+.cityrow .c{display:flex;gap:6px;align-items:center;color:var(--txt)}
+.pill{background:var(--g);color:#111;font-weight:700;font-size:12px;padding:7px 12px;border-radius:999px}
+.login{background:var(--g);color:#111;font-weight:700;border-radius:999px;padding:8px 14px;font-size:13px}
+/* search */
+.search{margin:12px 16px 0;display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;color:var(--mut)}
+.search input{flex:1;background:none;border:0;outline:0;color:var(--txt);font-size:15px}
+.search svg{width:18px;height:18px}
+main{padding:0 16px}
+h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:24px 0 12px;font-weight:700}
+/* hero */
+.hero{margin-top:14px;border-radius:22px;padding:22px 20px;background:radial-gradient(110% 130% at 100% 0,#e8b23a44,transparent 60%),linear-gradient(135deg,#1c1a14,#0f0f10);border:1px solid #3a3220}
+.hero h1{font-size:25px;line-height:1.12;letter-spacing:-.8px}.hero h1 span{color:var(--g)}
+.hero p{font-size:13.5px;color:var(--mut);margin-top:8px}
+/* tabs / chips */
+.seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px;margin-top:14px}
+.seg button{flex:1;padding:10px;border-radius:10px;font-weight:700;font-size:14px;color:var(--mut)}
+.seg button.on{background:var(--g);color:#111}
+.chips{display:flex;gap:8px;overflow-x:auto;margin:12px -16px 0;padding:0 16px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{white-space:nowrap;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--card);font-size:13px;color:var(--mut)}
+.chip.on{border-color:var(--g);color:var(--g);background:#e8b23a14}
+/* products */
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:14px}
+.pr{background:var(--card);border:1px solid var(--line);border-radius:18px;overflow:hidden}
+.pr .im{height:108px;display:grid;place-items:center;font-size:46px}
+.pr .in{padding:10px 12px 12px}
+.pr small{font-size:11px;color:var(--mut)}
+.pr h3{font-size:14px;font-weight:600;margin:2px 0 8px;min-height:36px}
+.pr .rw{display:flex;justify-content:space-between;align-items:center}
+.price{font-weight:800;color:var(--g);font-size:14px}
+.add{width:32px;height:32px;border-radius:10px;background:var(--g);color:#111;font-weight:900;font-size:18px}
+.empty{grid-column:1/-1;color:var(--mut);text-align:center;padding:30px 0;font-size:14px}
+/* services */
+.svc{display:flex;gap:14px;align-items:center;width:100%;text-align:left;border-radius:20px;padding:16px;margin-bottom:12px;border:1.5px solid var(--g);background:linear-gradient(120deg,#1a160c,#0e0e0f)}
+.svc:nth-child(even){background:linear-gradient(120deg,#17171a,#0e0e0f);border-color:#3a3a40}
+.svi{min-width:52px;height:52px;border-radius:16px;background:var(--g);color:#111;display:grid;place-items:center;font-size:26px}
+.svc small{font-size:11px;letter-spacing:.14em;color:var(--g);text-transform:uppercase}
+.svc b{display:block;font-size:17px;letter-spacing:-.2px}
+.svc span{font-size:12.5px;color:var(--mut)}
+.why{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.why div{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 6px;text-align:center}
+.why b{display:block;color:var(--g);font-size:14px}.why small{font-size:11px;color:var(--mut)}
+footer{text-align:center;color:var(--mut);font-size:12px;padding:26px 10px}
+/* messages */
+.conv{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-top:12px;width:100%;text-align:left}
+.av{width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,var(--g),var(--g2));display:grid;place-items:center;color:#111;font-weight:900;font-size:11px}
+.conv b{display:block}.conv small{color:var(--mut)}
+.chat{display:flex;flex-direction:column;gap:8px;margin:14px 0;min-height:240px}
+.bub{max-width:80%;padding:10px 14px;border-radius:18px;font-size:14px}
+.bub.me{align-self:flex-end;background:var(--g);color:#111;border-bottom-right-radius:4px}
+.bub.ot{align-self:flex-start;background:var(--card2);border-bottom-left-radius:4px}
+.send{display:flex;gap:8px;position:sticky;bottom:90px}
+.send input{flex:1;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;color:var(--txt);font-size:15px;outline:0}
+.send button{background:var(--g);color:#111;font-weight:800;border-radius:14px;padding:0 18px}
+.lock{text-align:center;margin-top:60px;color:var(--mut)}
+.lock div{font-size:44px;margin-bottom:10px}
+.btn{display:block;width:100%;background:var(--g);color:#111;font-weight:800;font-size:15px;border-radius:14px;padding:14px;margin-top:12px;text-align:center;text-decoration:none}
+.btn.o{background:none;border:1.5px solid var(--g);color:var(--g)}
+/* bottom nav */
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:rgba(16,16,18,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 8px 12px;z-index:30}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mut);padding:6px 0;border-radius:14px;position:relative}
+nav button svg{width:24px;height:24px}
+nav button.on{color:var(--g)}
+nav button.on::before{content:"";position:absolute;top:-9px;width:28px;height:3px;border-radius:3px;background:var(--g)}
+/* cart bar */
+#cartbar{position:fixed;bottom:78px;left:50%;transform:translateX(-50%) translateY(120px);width:calc(100% - 32px);max-width:448px;background:var(--g);color:#111;border-radius:16px;padding:14px 18px;display:flex;justify-content:space-between;font-weight:800;z-index:35;transition:.3s;box-shadow:0 10px 30px #000a}
+#cartbar.show{transform:translateX(-50%) translateY(0)}
+/* sheet */
+#ov{position:fixed;inset:0;background:#000a;z-index:50;opacity:0;pointer-events:none;transition:.25s}
+#ov.show{opacity:1;pointer-events:auto}
+#sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:100%;max-width:480px;max-height:85vh;overflow:auto;background:#121214;border-radius:26px 26px 0 0;border:1px solid var(--line);padding:10px 18px 28px;z-index:60;transition:.3s}
+#sheet.show{transform:translate(-50%,0)}
+.grab{width:42px;height:4px;border-radius:4px;background:#3a3a40;margin:4px auto 14px}
+#sheet h3{font-size:20px;letter-spacing:-.4px}
+#sheet p.s{color:var(--mut);font-size:13px;margin:4px 0 12px}
+.li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);font-size:14px}
+.li small{display:block;color:var(--mut);font-size:12px}
+.li .go{background:var(--g);color:#111;font-weight:700;font-size:12px;border-radius:10px;padding:8px 12px;white-space:nowrap}
+.fld{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;color:var(--txt);font-size:15px;margin-top:10px;outline:0}
+.fld:focus{border-color:var(--g)}
+.toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:70;pointer-events:none}
+.toast.show{opacity:1;transform:translateX(-50%)}
+</style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="hrow">
+      <div class="logo">ODA<br>SHOP</div>
+      <div class="greet" id="greet"></div>
+      <a class="ib f" id="call" aria-label="Appeler"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/></svg></a>
+      <button class="ib" id="menu" aria-label="Menu"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg></button>
+    </div>
+    <div class="cityrow">
+      <div class="c">📍 Ville : <b id="city">Agadez</b></div>
+      <button class="pill" id="otherCity">🛵 Commander vers une autre ville</button>
+    </div>
+  </header>
+  <div id="view"></div>
+  <div id="cartbar"><span id="cartTxt"></span><span>Commander ›</span></div>
+  <nav id="nav">
+    <button data-t="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+    <button data-t="msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>Messages</button>
+    <button data-t="svc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Nos services</button>
+  </nav>
+</div>
+<div id="ov"></div>
+<div id="sheet"></div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ⚠️ À remplacer par le vrai numéro WhatsApp d'ODA Shop (format international, sans +)
+const WA="22700000000";
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const store={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]||null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}},del(k){try{localStorage.removeItem(k)}catch(e){delete mem[k]}}};
+const mem={};
+let user=null;try{user=JSON.parse(store.get("oda_user"))}catch(e){}
+let city=store.get("oda_city")||"Agadez";
+let tab="home",sub="neuf",cat="all",q="",cart=[];
+let chat=[{m:"Bonjour 👋 Bienvenue chez ODA Shop ! Comment pouvons-nous vous aider ?",me:false}];
+
+const prods={
+neuf:[
+{n:"Smartphone 128 Go",p:"85 000",e:"📱",c:"Téléphones",g:"#e8b23a,#4a3510"},
+{n:"Écouteurs sans fil",p:"12 000",e:"🎧",c:"Téléphones",g:"#8b5cf6,#2a1856"},
+{n:"Ordinateur portable",p:"220 000",e:"💻",c:"Ordinateurs",g:"#38bdf8,#0c3550"},
+{n:"Canapé 3 places",p:"150 000",e:"🛋️",c:"Meubles",g:"#f97316,#4a2008"},
+{n:"Table à manger",p:"95 000",e:"🪑",c:"Meubles",g:"#a16207,#3a2503"},
+{n:"Réfrigérateur",p:"180 000",e:"🧊",c:"Électroménager",g:"#22d3ee,#0b3a44"},
+{n:"Téléviseur 43\"",p:"135 000",e:"📺",c:"Électroménager",g:"#6366f1,#1e1f58"},
+{n:"Climatiseur",p:"165 000",e:"❄️",c:"Électroménager",g:"#2dd4bf,#0d3b36"}],
+occ:[
+{n:"Téléphone occasion",p:"45 000",e:"📲",c:"Téléphones",g:"#22c55e,#0f3d20"},
+{n:"Laptop occasion",p:"90 000",e:"💻",c:"Ordinateurs",g:"#38bdf8,#0c3550"},
+{n:"Armoire",p:"40 000",e:"🚪",c:"Meubles",g:"#a16207,#3a2503"},
+{n:"Ventilateur",p:"15 000",e:"🌀",c:"Électroménager",g:"#2dd4bf,#0d3b36"},
+{n:"Générateur",p:"120 000",e:"⚡",c:"Électroménager",g:"#eab308,#4a3a05"},
+{n:"Moto 125cc",p:"380 000",e:"🏍️",c:"Véhicules",g:"#ef4444,#4a1111"},
+{n:"Toyota Corolla 2012",p:"3 200 000",e:"🚗",c:"Véhicules",g:"#f43f5e,#4a1020"},
+{n:"Vélo",p:"25 000",e:"🚲",c:"Divers",g:"#84cc16,#2d4a07"}]};
+
+const services=[
+{k:"Section 1",t:"Boutique neuve",s:"Téléphones, ordinateurs, meubles, électroménager neufs",i:"🛍️",go:"home:neuf"},
+{k:"Section 2",t:"Marché occasion",s:"Achetez et vendez des produits d'occasion",i:"🏷️",go:"home:occ"},
+{k:"Section 3",t:"Livraison nourriture",s:"Restaurants d'Agadez livrés chez vous",i:"🍽️",items:[["Restaurant (démo) 1","Plats locaux · 30 min"],["Restaurant (démo) 2","Grillades · 40 min"],["Fast-food (démo)","Burgers, poulet · 25 min"]],cta:"Commander"},
+{k:"Secteur 4",t:"Pharmacie",s:"Pharmacie Agadez · Maison Longrich (toutes régions)",i:"💊",items:[["Pharmacie Agadez","Médicaments et produits de santé"],["Maison Longrich","Produits bien-être · toutes régions"]],cta:"Commander"},
+{k:"Secteur 5",t:"Immobilier",s:"Maisons, boutiques et terrains à Agadez",i:"🏢",items:[["Maisons","Location et vente"],["Boutiques","Local commercial"],["Terrains","Parcelles à vendre"]],cta:"Se renseigner"},
+{k:"Secteur 6",t:"Transport",s:"Camions et motos à 3 roues avec caisse à Agadez",i:"🚚",items:[["Camions","Transport de marchandises"],["Motos à 3 roues","Avec caisse · courses en ville"]],cta:"Réserver"},
+{k:"Secteur 7",t:"Travaux à domicile",s:"Électricien, plombier, soudeur, menuisier, peintre, maçon",i:"🔧",items:[["Électricien","Installation et dépannage"],["Plombier","Fuites, sanitaires"],["Soudeur","Portes, grilles, structures"],["Menuisier","Meubles sur mesure"],["Peintre","Intérieur et extérieur"],["Maçon","Construction et réparation"]],cta:"Demander"},
+{k:"Secteur 8",t:"Service colis ODA",s:"Envoyez et récupérez vos colis dans toutes les compagnies à Agadez",i:"📦",items:[["Envoyer un colis","Dépôt chez vous, livraison compagnie"],["Récupérer un colis","On le retire et on vous le livre"]],cta:"Demander"}
+];
+
+const wa=t=>`https://wa.me/${WA}?text=${encodeURIComponent(t)}`;
+const who=()=>user?`Client : ${user.name}${user.phone?" ("+user.phone+")":""}\n`:"";
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1700)}
+function openSheet(h){$("#sheet").innerHTML='<div class="grab"></div>'+h;$("#ov").classList.add("show");$("#sheet").classList.add("show")}
+function closeSheet(){$("#ov").classList.remove("show");$("#sheet").classList.remove("show")}
+$("#ov").onclick=closeSheet;
+
+function header(){
+  $("#city").textContent=city;
+  $("#call").href="tel:+"+WA;
+  $("#greet").innerHTML=user?`<b>Bienvenue <span>${esc(user.name)}</span></b><small>${esc(city)}</small>`:`<button class="login" onclick="authSheet()">Créer mon compte</button>`;
+}
+function setTab(t){tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));render();scrollTo(0,0)}
+document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
+
+function render(){header();({home,msg,svc})[tab]()}
+
+function home(){
+  const list=prods[sub];
+  const cats=["all",...new Set(list.map(x=>x.c))];
+  if(!cats.includes(cat))cat="all";
+  const f=list.filter(x=>(cat=="all"||x.c==cat)&&x.n.toLowerCase().includes(q.toLowerCase()));
+  $("#view").innerHTML=`
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" placeholder="Que cherchez-vous ?" value="${esc(q)}"></div>
+  <main>
+   <div class="hero"><h1>Achetez, vendez,<br><span>on vous livre.</span></h1><p>Livraison à ${esc(city)} · Paiement à la livraison · Commande via WhatsApp</p></div>
+   <div class="seg"><button class="${sub=="neuf"?"on":""}" data-s="neuf">Boutique neuve</button><button class="${sub=="occ"?"on":""}" data-s="occ">Marché occasion</button></div>
+   <div class="chips">${cats.map(c=>`<button class="chip ${c==cat?"on":""}" data-c="${c}">${c=="all"?"Tout":c}</button>`).join("")}</div>
+   <div class="grid">${f.length?f.map((x,i)=>`<div class="pr"><div class="im" style="background:linear-gradient(135deg,${x.g})">${x.e}</div><div class="in"><small>${sub=="neuf"?"Neuf":"Occasion"} · ${x.c}</small><h3>${x.n}</h3><div class="rw"><span class="price">${x.p} F</span><button class="add" data-n="${esc(x.n)}" data-p="${x.p}">+</button></div></div></div>`).join(""):'<div class="empty">Aucun article trouvé.</div>'}</div>
+   <h2>Pourquoi ODA Shop</h2>
+   <div class="why"><div><b>Rapide</b><small>Livraison à ${esc(city)}</small></div><div><b>Sûr</b><small>Paiement livraison</small></div><div><b>Simple</b><small>Commande WhatsApp</small></div></div>
+   <footer>© 2026 ODA Shop · Livraison à Agadez · Payez et faites-vous livrer<br>Maquette de démonstration — produits et prix fictifs</footer>
+  </main>`;
+  $("#q").oninput=e=>{q=e.target.value;const p=e.target.selectionStart;home();const i=$("#q");i.focus();i.setSelectionRange(p,p)};
+  document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{sub=b.dataset.s;cat="all";home()});
+  document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{cat=b.dataset.c;home()});
+  document.querySelectorAll(".add").forEach(b=>b.onclick=()=>{cart.push({n:b.dataset.n,p:b.dataset.p});cartUI();toast("Ajouté ✓")});
+}
+
+function cartUI(){
+  const b=$("#cartbar");
+  if(cart.length){b.classList.add("show");$("#cartTxt").textContent=`🛒 ${cart.length} article${cart.length>1?"s":""}`}else b.classList.remove("show");
+}
+$("#cartbar").onclick=()=>{
+  const txt=`Bonjour ODA Shop, je souhaite commander :\n`+cart.map(c=>`• ${c.n} — ${c.p} F`).join("\n")+`\n\n${who()}Ville : ${city}\nPaiement à la livraison.`;
+  openSheet(`<h3>Votre commande</h3><p class="s">Livraison à ${esc(city)} · Paiement à la livraison</p>`+cart.map((c,i)=>`<div class="li"><div>${esc(c.n)}<small>${c.p} F</small></div><button class="go" onclick="rm(${i})">Retirer</button></div>`).join("")+`<a class="btn" href="${wa(txt)}" target="_blank" rel="noopener">Envoyer sur WhatsApp</a>`);
+};
+function rm(i){cart.splice(i,1);cartUI();cart.length?$("#cartbar").click():closeSheet()}
+
+function svc(){
+  $("#view").innerHTML=`<main>
+   <h2 style="margin-top:20px">Nos services</h2>
+   ${services.map((s,i)=>`<button class="svc" data-i="${i}"><div class="svi">${s.i}</div><div><small>${s.k}</small><b>${s.t}</b><span>${s.s}</span></div></button>`).join("")}
+   <h2>Pourquoi ODA Shop</h2>
+   <div class="why"><div><b>Rapide</b><small>Livraison à ${esc(city)}</small></div><div><b>Sûr</b><small>Paiement livraison</small></div><div><b>Simple</b><small>Commande WhatsApp</small></div></div>
+   <footer>© 2026 ODA Shop</footer></main>`;
+  document.querySelectorAll(".svc").forEach(b=>b.onclick=()=>{
+    const s=services[b.dataset.i];
+    if(s.go){const [,x]=s.go.split(":");sub=x;cat="all";q="";setTab("home");return}
+    openSheet(`<h3>${s.i} ${s.t}</h3><p class="s">${s.s}</p>`+s.items.map((it,j)=>`<div class="li"><div>${it[0]}<small>${it[1]}</small></div><a class="go" target="_blank" rel="noopener" href="${wa(`Bonjour ODA Shop, service « ${s.t} » : ${it[0]}.\n${who()}Ville : ${city}`)}">${s.cta}</a></div>`).join(""));
+  });
+}
+
+function msg(){
+  if(!user){
+    $("#view").innerHTML=`<main><div class="lock"><div>💬</div><b style="color:var(--txt);font-size:18px">Vos messages</b><p style="margin-top:6px;font-size:14px">Créez un compte pour discuter avec ODA Shop.</p><button class="btn" onclick="authSheet()">Créer mon compte</button></div></main>`;return}
+  $("#view").innerHTML=`<main>
+   <button class="conv"><div class="av">ODA</div><div><b>Support ODA Shop</b><small>En ligne · réponse rapide</small></div></button>
+   <div class="chat" id="chat">${chat.map(c=>`<div class="bub ${c.me?"me":"ot"}">${esc(c.m)}</div>`).join("")}</div>
+   <form class="send" id="sf"><input id="mi" placeholder="Écrire un message…" autocomplete="off"><button>Envoyer</button></form>
+   <a class="btn o" target="_blank" rel="noopener" href="${wa("Bonjour ODA Shop, je suis "+user.name)}">Continuer sur WhatsApp</a></main>`;
+  $("#sf").onsubmit=e=>{e.preventDefault();const v=$("#mi").value.trim();if(!v)return;chat.push({m:v,me:true});msg();setTimeout(()=>{chat.push({m:"Merci ! Un conseiller vous répond très bientôt.",me:false});if(tab=="msg")msg()},900)};
+}
+
+function authSheet(){
+  openSheet(`<h3>Créer mon compte</h3><p class="s">Votre nom s'affichera en haut de l'application.</p>
+  <input class="fld" id="an" placeholder="Votre prénom" autocomplete="given-name">
+  <input class="fld" id="ap" placeholder="Téléphone / WhatsApp" inputmode="tel" autocomplete="tel">
+  <button class="btn" id="as">Continuer</button>`);
+  $("#as").onclick=()=>{const n=$("#an").value.trim();if(!n){toast("Entrez votre prénom");return}
+    user={name:n,phone:$("#ap").value.trim()};store.set("oda_user",JSON.stringify(user));closeSheet();render();toast("Bienvenue "+n+" 👋")};
+}
+$("#menu").onclick=()=>openSheet(`<h3>Menu</h3>
+  <div class="li"><div>${user?esc(user.name):"Non connecté"}<small>${user?esc(user.phone||"Compte ODA Shop"):"Créez un compte pour profiter de tout"}</small></div>${user?'<button class="go" id="lo">Déconnexion</button>':'<button class="go" onclick="authSheet()">Créer</button>'}</div>
+  <div class="li"><div>Ville<small>${esc(city)}</small></div><button class="go" onclick="citySheet()">Changer</button></div>
+  <div class="li"><div>Nous contacter<small>WhatsApp et appel</small></div><a class="go" target="_blank" rel="noopener" href="${wa("Bonjour ODA Shop")}">WhatsApp</a></div>`);
+document.addEventListener("click",e=>{if(e.target.id=="lo"){user=null;store.del("oda_user");chat=chat.slice(0,1);closeSheet();render()}});
+function citySheet(){
+  openSheet(`<h3>🛵 Commander vers une autre ville</h3><p class="s">Choisissez la ville de livraison.</p>`+["Agadez","Niamey","Zinder","Maradi","Tahoua","Arlit","Dosso"].map(c=>`<div class="li"><div>${c}</div><button class="go" onclick="setCity('${c}')">${c==city?"✓ Choisie":"Choisir"}</button></div>`).join(""));
+}
+function setCity(c){city=c;store.set("oda_city",c);closeSheet();render();toast("Ville : "+c)}
+$("#otherCity").onclick=citySheet;
+setTab("home");
+</script>
+</body>
+</html>
