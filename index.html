@@ -7,13 +7,14 @@
 <title>ODA Shop</title>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-:root{--bg:#09090a;--card:#141416;--card2:#1b1b1e;--line:#2a2a2e;--txt:#f6f4ee;--mut:#9b9a93;--g:#e8b23a;--g2:#b8821a}
+:root{--bg:#ffffff;--card:#f6f4ee;--card2:#ece8de;--line:#e6e1d4;--txt:#17150f;--mut:#6d695d;--g:#e8b23a;--g2:#b8821a;--gt:#9a6a08;--hdr:rgba(255,255,255,.92);--navbg:rgba(255,255,255,.96);--sheet:#ffffff;--page:#e9e6dd;--herobg:radial-gradient(110% 130% at 100% 0,#e8b23a55,transparent 60%),linear-gradient(135deg,#fff6df,#f6f4ee);--tile:linear-gradient(135deg,#f3e6bf,#e6d9b6);--grab:#d4cfc2;--herobd:#ead9a8}
+:root[data-theme="dark"]{--bg:#09090a;--card:#141416;--card2:#1b1b1e;--line:#2a2a2e;--txt:#f6f4ee;--mut:#9b9a93;--g:#e8b23a;--g2:#b8821a;--gt:#e8b23a;--hdr:rgba(9,9,10,.88);--navbg:rgba(16,16,18,.94);--sheet:#121214;--page:#000;--herobg:radial-gradient(110% 130% at 100% 0,#e8b23a44,transparent 60%),linear-gradient(135deg,#1c1a14,#0f0f10);--tile:linear-gradient(135deg,#2a2412,#111);--grab:#3a3a40;--herobd:#3a3220}
 *{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
-body{background:#000;color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
+body{background:var(--page);color:var(--txt);font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;line-height:1.4}
 #app{max-width:480px;margin:auto;min-height:100vh;background:var(--bg);position:relative;padding-bottom:96px}
 button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
 /* header */
-header{position:sticky;top:0;z-index:20;background:rgba(9,9,10,.88);backdrop-filter:blur(14px);padding:12px 16px 8px;border-bottom:1px solid var(--line)}
+header{position:sticky;top:0;z-index:20;background:var(--hdr);backdrop-filter:blur(14px);padding:12px 16px 8px;border-bottom:1px solid var(--line)}
 .hrow{display:flex;align-items:center;gap:10px}
 .logo{width:42px;height:42px;border-radius:12px;background:linear-gradient(135deg,var(--g),var(--g2));color:#111;font-weight:900;font-size:10px;line-height:1;display:grid;place-items:center;text-align:center;letter-spacing:-.3px}
 .greet{flex:1;text-align:center}
@@ -33,7 +34,7 @@ header{position:sticky;top:0;z-index:20;background:rgba(9,9,10,.88);backdrop-fil
 main{padding:0 16px}
 h2{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--mut);margin:24px 0 12px;font-weight:700}
 /* hero */
-.hero{margin-top:14px;border-radius:22px;padding:22px 20px;background:radial-gradient(110% 130% at 100% 0,#e8b23a44,transparent 60%),linear-gradient(135deg,#1c1a14,#0f0f10);border:1px solid #3a3220}
+.hero{margin-top:14px;border-radius:22px;padding:22px 20px;background:var(--herobg);border:1px solid var(--herobd)}
 .hero h1{font-size:25px;line-height:1.12;letter-spacing:-.8px}.hero h1 span{color:var(--g)}
 .hero p{font-size:13.5px;color:var(--mut);margin-top:8px}
 /* tabs / chips */
@@ -82,7 +83,7 @@ footer{text-align:center;color:var(--mut);font-size:12px;padding:26px 10px}
 .btn{display:block;width:100%;background:var(--g);color:#111;font-weight:800;font-size:15px;border-radius:14px;padding:14px;margin-top:12px;text-align:center;text-decoration:none}
 .btn.o{background:none;border:1.5px solid var(--g);color:var(--g)}
 /* bottom nav */
-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:rgba(16,16,18,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 8px 12px;z-index:30}
+nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;display:flex;background:var(--navbg);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:8px 8px 12px;z-index:30}
 nav button{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:11px;color:var(--mut);padding:6px 0;border-radius:14px;position:relative}
 nav button svg{width:24px;height:24px}
 nav button.on{color:var(--g)}
@@ -93,9 +94,9 @@ nav button.on::before{content:"";position:absolute;top:-9px;width:28px;height:3p
 /* sheet */
 #ov{position:fixed;inset:0;background:#000a;z-index:50;opacity:0;pointer-events:none;transition:.25s}
 #ov.show{opacity:1;pointer-events:auto}
-#sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:100%;max-width:480px;max-height:85vh;overflow:auto;background:#121214;border-radius:26px 26px 0 0;border:1px solid var(--line);padding:10px 18px 28px;z-index:60;transition:.3s}
+#sheet{position:fixed;left:50%;bottom:0;transform:translate(-50%,100%);width:100%;max-width:480px;max-height:85vh;overflow:auto;background:var(--sheet);border-radius:26px 26px 0 0;border:1px solid var(--line);padding:10px 18px 28px;z-index:60;transition:.3s}
 #sheet.show{transform:translate(-50%,0)}
-.grab{width:42px;height:4px;border-radius:4px;background:#3a3a40;margin:4px auto 14px}
+.grab{width:42px;height:4px;border-radius:4px;background:var(--grab);margin:4px auto 14px}
 #sheet h3{font-size:20px;letter-spacing:-.4px}
 #sheet p.s{color:var(--mut);font-size:13px;margin:4px 0 12px}
 .li{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:13px 0;border-bottom:1px solid var(--line);font-size:14px}
@@ -103,7 +104,31 @@ nav button.on::before{content:"";position:absolute;top:-9px;width:28px;height:3p
 .li .go{background:var(--g);color:#111;font-weight:700;font-size:12px;border-radius:10px;padding:8px 12px;white-space:nowrap}
 .fld{width:100%;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 14px;color:var(--txt);font-size:15px;margin-top:10px;outline:0}
 .fld:focus{border-color:var(--g)}
-.toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(20px);background:#fff;color:#111;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:70;pointer-events:none}
+.slider{margin-top:14px;position:relative;border-radius:22px;overflow:hidden;border:1px solid var(--herobd)}
+.track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+.track::-webkit-scrollbar{display:none}
+.slide{flex:0 0 100%;scroll-snap-align:start;position:relative;min-height:176px;display:flex;align-items:flex-end;cursor:pointer;text-align:left;background:radial-gradient(110% 130% at 100% 0,#e8b23a55,transparent 60%),linear-gradient(135deg,#1c1a14,#0f0f10)}
+.slide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.slide::after{content:"";position:absolute;inset:0;background:linear-gradient(0deg,#000d 0%,#0005 55%,#0002 100%)}
+.slide .se{position:absolute;right:18px;top:16px;font-size:58px;line-height:1;filter:drop-shadow(0 4px 10px #0008)}
+.slide .sc{position:relative;z-index:1;padding:18px 18px 30px;width:100%}
+.slide h1{font-size:22px;line-height:1.12;letter-spacing:-.6px;max-width:82%}
+.slide p{font-size:13px;color:#e6e2d6;margin-top:6px;max-width:86%}
+.slide .sb{display:inline-block;margin-top:10px;background:var(--g);color:#111;font-weight:800;font-size:12px;border-radius:999px;padding:7px 14px}
+.dots{position:absolute;left:0;right:0;bottom:9px;display:flex;justify-content:center;gap:6px;z-index:2}
+.dots i{width:6px;height:6px;border-radius:50%;background:#fff6;transition:.25s}
+.dots i.on{background:var(--g);width:18px;border-radius:6px}
+.fabw{flex:1;display:flex;justify-content:center}
+nav .fab{flex:none;width:54px;height:54px;padding:0;border-radius:50%;background:var(--g);color:#111;font-size:32px;font-weight:900;display:grid;place-items:center;margin-top:-28px;box-shadow:0 8px 22px #e8b23a66;line-height:1}
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:4px}
+.tile{position:relative;aspect-ratio:1;border-radius:16px;overflow:hidden;border:1px solid var(--line);background:var(--tile);display:grid;place-items:center;font-size:26px;padding:0}
+.tile img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.tile span{position:absolute;left:0;right:0;bottom:0;padding:16px 4px 5px;font-size:10px;font-weight:700;line-height:1.15;text-align:center;color:#fff;background:linear-gradient(transparent,#000d)}
+.bd{font-size:11px;font-weight:700;padding:3px 9px;border-radius:999px;background:#e8b23a22;color:var(--g);white-space:nowrap}
+.bd.ok{background:#22c55e22;color:#22c55e}.bd.no{background:#ef444422;color:#ef4444}
+.lb{display:block;font-size:12px;color:var(--mut);margin-top:12px}
+.greet b span,.price,.why b,.chip.on,.btn.o,.ib,nav button.on{color:var(--gt)}
+.toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--txt);color:var(--bg);box-shadow:0 6px 20px #0003;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:70;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style>
 </head>
@@ -125,8 +150,8 @@ nav button.on::before{content:"";position:absolute;top:-9px;width:28px;height:3p
   <div id="cartbar"><span id="cartTxt"></span><span>Commander ›</span></div>
   <nav id="nav">
     <button data-t="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
+    <div class="fabw"><button class="fab" id="fab" aria-label="Publier un produit">+</button></div>
     <button data-t="msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>Messages</button>
-    <button data-t="svc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="2"/><rect x="14" y="3" width="7" height="7" rx="2"/><rect x="3" y="14" width="7" height="7" rx="2"/><rect x="14" y="14" width="7" height="7" rx="2"/></svg>Nos services</button>
   </nav>
 </div>
 <div id="ov"></div>
@@ -140,7 +165,14 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const store={get(k){try{return localStorage.getItem(k)}catch(e){return mem[k]||null}},set(k,v){try{localStorage.setItem(k,v)}catch(e){mem[k]=v}},del(k){try{localStorage.removeItem(k)}catch(e){delete mem[k]}}};
 const mem={};
-let user=null;try{user=JSON.parse(store.get("oda_user"))}catch(e){}
+/* ---- Thème : clair par défaut, sombre en option ---- */
+function applyTheme(t){
+  document.documentElement.dataset.theme=t;
+  const m=document.querySelector('meta[name="theme-color"]');if(m)m.content=t=="dark"?"#0a0a0a":"#ffffff";
+}
+let theme=store.get("oda_theme")=="dark"?"dark":"light";applyTheme(theme);
+function toggleTheme(){theme=theme=="dark"?"light":"dark";store.set("oda_theme",theme);applyTheme(theme);closeSheet();toast(theme=="dark"?"Mode sombre":"Mode clair")}
+let user=null,uid=null;
 let city=store.get("oda_city")||"Agadez";
 let tab="home",sub="neuf",cat="all",q="",cart=[];
 let chat=[{m:"Bonjour 👋 Bienvenue chez ODA Shop ! Comment pouvons-nous vous aider ?",me:false}];
@@ -166,8 +198,8 @@ occ:[
 {n:"Vélo",p:"25 000",e:"🚲",c:"Divers",g:"#84cc16,#2d4a07"}]};
 
 const demoServices=[
-{k:"Section 1",t:"Boutique neuve",s:"Téléphones, ordinateurs, meubles, électroménager neufs",i:"🛍️",go:"home:neuf"},
-{k:"Section 2",t:"Marché occasion",s:"Achetez et vendez des produits d'occasion",i:"🏷️",go:"home:occ"},
+{slug:"neuf",k:"Section 1",t:"Boutique neuve",s:"Téléphones, ordinateurs, meubles, électroménager neufs",i:"🛍️",go:"home:neuf"},
+{slug:"occasion",k:"Section 2",t:"Marché occasion",s:"Achetez et vendez des produits d'occasion",i:"🏷️",go:"home:occ"},
 {k:"Section 3",t:"Livraison nourriture",s:"Restaurants d'Agadez livrés chez vous",i:"🍽️",items:[["Restaurant (démo) 1","Plats locaux · 30 min"],["Restaurant (démo) 2","Grillades · 40 min"],["Fast-food (démo)","Burgers, poulet · 25 min"]],cta:"Commander"},
 {k:"Secteur 4",t:"Pharmacie",s:"Pharmacie Agadez · Maison Longrich (toutes régions)",i:"💊",items:[["Pharmacie Agadez","Médicaments et produits de santé"],["Maison Longrich","Produits bien-être · toutes régions"]],cta:"Commander"},
 {k:"Secteur 5",t:"Immobilier",s:"Maisons, boutiques et terrains à Agadez",i:"🏢",items:[["Maisons","Location et vente"],["Boutiques","Local commercial"],["Terrains","Parcelles à vendre"]],cta:"Se renseigner"},
@@ -178,11 +210,23 @@ const demoServices=[
 
 /* ---- Données en direct depuis Supabase (gérées dans ODA Shop Office) ---- */
 const SB_URL="https://zssyuerclbjydkuooukk.supabase.co",SB_KEY="sb_publishable_8JxMf66gzM7B9idXFtTSEg_ddXevxEf";
-const sbc=window.supabase?window.supabase.createClient(SB_URL,SB_KEY):null;
+const sbc=window.supabase?window.supabase.createClient(SB_URL,SB_KEY,{auth:{storageKey:"oda-client-auth",persistSession:true,autoRefreshToken:true}}):null;
+const emailOf=p=>String(p).replace(/\D/g,"")+"@clients.odashop.app";
+function applySession(s){
+  if(s&&s.user){const m=s.user.user_metadata||{};uid=s.user.id;user={name:m.name||"Client",phone:m.phone||""}}
+  else{uid=null;user=null}
+}
+async function initAuth(){
+  try{if(sbc){const {data}=await sbc.auth.getSession();applySession(data.session)}}catch(e){}
+  render();
+}
+let banners=[{t:"Achetez, vendez, on vous livre",s:"Boutique neuve, occasion et services · Paiement à la livraison",e:"🚚",btn:"",img:"",target:""}],slideTimer=null;
 let prods={neuf:[],occ:[]},services=demoServices,cities=["Agadez","Niamey","Zinder","Maradi","Tahoua","Arlit","Dosso"];
 async function loadRemote(){
   try{
     if(!sbc)throw new Error("offline");
+    const bn=await sbc.from("banners").select("*").order("sort_order");
+    if(bn.data&&bn.data.length)banners=bn.data.map(b=>({t:b.title,s:b.subtitle||"",e:b.emoji||"",btn:b.button||"",img:b.image_url||"",target:b.target||""}));
     const [p,s,i,c,st]=await Promise.all([
       sbc.from("products").select("*").order("created_at",{ascending:false}),
       sbc.from("services").select("*").order("sort_order"),
@@ -191,9 +235,10 @@ async function loadRemote(){
       sbc.from("settings").select("*")]);
     if(p.error)throw p.error;
     const g=["#e8b23a,#4a3510","#38bdf8,#0c3550","#8b5cf6,#2a1856","#22c55e,#0f3d20"],m={neuf:[],occ:[]};
-    p.data.forEach((x,k)=>m[x.section=="neuf"?"neuf":"occ"].push({n:x.name,p:Number(x.price).toLocaleString("fr-FR"),e:"📦",img:x.image_url,c:x.category||"Divers",g:g[k%4]}));
+    const shR=await sbc.from("shops").select("id,name");const shM=Object.fromEntries((shR.data||[]).map(z=>[z.id,z.name]));
+    p.data.forEach((x,k)=>m[x.section=="neuf"?"neuf":"occ"].push({shop:shM[x.shop_id]||"",n:x.name,p:Number(x.price).toLocaleString("fr-FR"),e:"📦",img:x.image_url,c:x.category||"Divers",g:g[k%4]}));
     prods=m;
-    services=[demoServices[0],demoServices[1],...(s.data||[]).map(x=>({k:x.label,t:x.title,s:x.subtitle||"",i:x.icon||"🧰",cta:x.cta||"Commander",items:(i.data||[]).filter(y=>y.service_id==x.id).map(y=>[y.name,y.description||""])}))];
+    if(s.data&&s.data.length)services=s.data.map(x=>({slug:x.slug,k:x.label,t:x.title,s:x.subtitle||"",i:x.icon||"🧰",cta:x.cta||"Commander",img:x.image_url||"",items:(i.data||[]).filter(y=>y.service_id==x.id).map(y=>({name:y.name,description:y.description||"",price:Number(y.price)||0,img:y.image_url||""}))}));
     if(c.data&&c.data.length)cities=c.data.map(x=>x.name);
     const set=Object.fromEntries((st.data||[]).map(x=>[x.key,x.value]));
     if(set.whatsapp_number)WA=set.whatsapp_number;
@@ -212,10 +257,12 @@ function header(){
   $("#call").href="tel:+"+WA;
   $("#greet").innerHTML=user?`<b>Bienvenue <span>${esc(user.name)}</span></b><small>${esc(city)}</small>`:`<button class="login" onclick="authSheet()">Créer mon compte</button>`;
 }
-function setTab(t){clearInterval(chatTimer);tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));render();scrollTo(0,0)}
-document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
+function setTab(t){clearInterval(chatTimer);clearInterval(slideTimer);tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));render();scrollTo(0,0)}
+document.querySelectorAll("nav button[data-t]").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
+$("#fab").onclick=()=>sellFlow();
 
-function render(){header();({home,msg,svc})[tab]()}
+function render(){header();({home,msg,svc,service:serviceView})[tab]()}
+const pf=p=>/\d/.test(String(p))?p+" F":p;
 
 function home(){
   const list=prods[sub];
@@ -225,10 +272,12 @@ function home(){
   $("#view").innerHTML=`
   <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="q" placeholder="Que cherchez-vous ?" value="${esc(q)}"></div>
   <main>
-   <div class="hero"><h1>Achetez, vendez,<br><span>on vous livre.</span></h1><p>Livraison à ${esc(city)} · Paiement à la livraison · Commande via WhatsApp</p></div>
-   <div class="seg"><button class="${sub=="neuf"?"on":""}" data-s="neuf">Boutique neuve</button><button class="${sub=="occ"?"on":""}" data-s="occ">Marché occasion</button></div>
+   <div class="slider"><div class="track" id="track">${banners.map((b,i)=>`<div class="slide" data-b="${i}">${b.img?`<img src="${esc(b.img)}" alt="">`:""}${b.e&&!b.img?`<div class="se">${esc(b.e)}</div>`:""}<div class="sc"><h1>${esc(b.t)}</h1>${b.s?`<p>${esc(b.s)}</p>`:""}${b.btn&&b.target?`<span class="sb">${esc(b.btn)} ›</span>`:""}</div></div>`).join("")}</div>${banners.length>1?`<div class="dots" id="dots">${banners.map((b,i)=>`<i class="${i?"":"on"}"></i>`).join("")}</div>`:""}</div>
+   <h2>Services</h2>
+   <div class="tiles">${services.map((s,i)=>`<button class="tile" data-i="${i}">${s.img?`<img src="${esc(s.img)}" alt="" loading="lazy">`:s.i}<span>${esc(s.t)}</span></button>`).join("")}</div>
+   <div class="seg" id="prodTop"><button class="${sub=="neuf"?"on":""}" data-s="neuf">Boutique neuve</button><button class="${sub=="occ"?"on":""}" data-s="occ">Marché occasion</button></div>
    <div class="chips">${cats.map(c=>`<button class="chip ${c==cat?"on":""}" data-c="${c}">${c=="all"?"Tout":c}</button>`).join("")}</div>
-   <div class="grid">${f.length?f.map((x,i)=>`<div class="pr"><div class="im" style="background:linear-gradient(135deg,${x.g})">${x.img?`<img src="${esc(x.img)}" alt="" style="width:100%;height:100%;object-fit:cover">`:x.e}</div><div class="in"><small>${sub=="neuf"?"Neuf":"Occasion"} · ${x.c}</small><h3>${x.n}</h3><div class="rw"><span class="price">${x.p} F</span><button class="add" data-n="${esc(x.n)}" data-p="${x.p}">+</button></div></div></div>`).join(""):'<div class="empty">Aucun article trouvé.</div>'}</div>
+   <div class="grid">${f.length?f.map((x,i)=>`<div class="pr"><div class="im" style="background:linear-gradient(135deg,${x.g})">${x.img?`<img src="${esc(x.img)}" alt="" style="width:100%;height:100%;object-fit:cover">`:x.e}</div><div class="in"><small>${sub=="neuf"?"Neuf":"Occasion"} · ${x.c}${x.shop?" · 🏪 "+esc(x.shop):""}</small><h3>${x.n}</h3><div class="rw"><span class="price">${x.p} F</span><button class="add" data-n="${esc(x.n)}" data-p="${x.p}">+</button></div></div></div>`).join(""):'<div class="empty">Aucun article trouvé.</div>'}</div>
    <h2>Pourquoi ODA Shop</h2>
    <div class="why"><div><b>Rapide</b><small>Livraison à ${esc(city)}</small></div><div><b>Sûr</b><small>Paiement livraison</small></div><div><b>Simple</b><small>Commande WhatsApp</small></div></div>
    <footer>© 2026 ODA Shop · Livraison à Agadez · Payez et faites-vous livrer<br>Maquette de démonstration — produits et prix fictifs</footer>
@@ -236,6 +285,8 @@ function home(){
   $("#q").oninput=e=>{q=e.target.value;const p=e.target.selectionStart;home();const i=$("#q");i.focus();i.setSelectionRange(p,p)};
   document.querySelectorAll("[data-s]").forEach(b=>b.onclick=()=>{sub=b.dataset.s;cat="all";home()});
   document.querySelectorAll("[data-c]").forEach(b=>b.onclick=()=>{cat=b.dataset.c;home()});
+  document.querySelectorAll(".tile").forEach(b=>b.onclick=()=>openService(services[b.dataset.i]));
+  initSlider();
   document.querySelectorAll(".add").forEach(b=>b.onclick=()=>{cart.push({n:b.dataset.n,p:b.dataset.p});cartUI();toast("Ajouté ✓")});
 }
 
@@ -244,25 +295,67 @@ function cartUI(){
   if(cart.length){b.classList.add("show");$("#cartTxt").textContent=`🛒 ${cart.length} article${cart.length>1?"s":""}`}else b.classList.remove("show");
 }
 $("#cartbar").onclick=()=>{
-  const txt=`Bonjour ODA Shop, je souhaite commander :\n`+cart.map(c=>`• ${c.n} — ${c.p} F`).join("\n")+`\n\n${who()}Ville : ${city}\nPaiement à la livraison.`;
-  openSheet(`<h3>Votre commande</h3><p class="s">Livraison à ${esc(city)} · Paiement à la livraison</p>`+cart.map((c,i)=>`<div class="li"><div>${esc(c.n)}<small>${c.p} F</small></div><button class="go" onclick="rm(${i})">Retirer</button></div>`).join("")+`<input class="fld" id="ad" placeholder="Adresse / quartier de livraison"><button class="btn" id="cf">Confirmer la commande</button><a class="btn o" href="${wa(txt)}" target="_blank" rel="noopener">Envoyer aussi sur WhatsApp</a>`);
+  const txt=`Bonjour ODA Shop, je souhaite commander :\n`+cart.map(c=>`• ${c.n} — ${pf(c.p)}`).join("\n")+`\n\n${who()}Ville : ${city}\nPaiement à la livraison.`;
+  openSheet(`<h3>Votre commande</h3><p class="s">Livraison à ${esc(city)} · Paiement à la livraison</p>`+cart.map((c,i)=>`<div class="li"><div>${esc(c.n)}<small>${pf(c.p)}</small></div><button class="go" onclick="rm(${i})">Retirer</button></div>`).join("")+`<input class="fld" id="ad" placeholder="Adresse / quartier de livraison"><button class="btn" id="cf">Confirmer la commande</button><a class="btn o" href="${wa(txt)}" target="_blank" rel="noopener">Envoyer aussi sur WhatsApp</a>`);
   $("#cf").onclick=async()=>{
     if(!user){closeSheet();authSheet();toast("Créez d'abord votre compte");return}
     const total=cart.reduce((a,c)=>a+Number(String(c.p).replace(/\D/g,"")),0);
-    const {error}=await sbc.from("orders").insert({customer_name:user.name,customer_phone:user.phone||null,city,address:$("#ad").value.trim()||null,items:cart.map(c=>({n:c.n,p:c.p+" F"})),total,kind:"produit"});
+    const {error}=await sbc.from("orders").insert({customer_name:user.name,customer_phone:user.phone||null,city,address:$("#ad").value.trim()||null,items:cart.map(c=>({n:c.n,p:pf(c.p)})),total,kind:(()=>{const k=[...new Set(cart.map(c=>c.svc||"produit"))];return k.length==1?k[0]:"mixte"})(),customer_id:uid});
     if(error){toast("Erreur, réessayez");return}
     cart=[];cartUI();closeSheet();toast("Commande envoyée ✓");
   };
 };
 function rm(i){cart.splice(i,1);cartUI();cart.length?$("#cartbar").click():closeSheet()}
 
+function initSlider(){
+  clearInterval(slideTimer);
+  const tr=$("#track");if(!tr)return;
+  const dots=[...document.querySelectorAll("#dots i")],n=banners.length;
+  let touched=false,idx=0;
+  const go=i=>{idx=(i+n)%n;tr.scrollTo({left:tr.clientWidth*idx,behavior:"smooth"})};
+  tr.addEventListener("scroll",()=>{const k=Math.round(tr.scrollLeft/Math.max(1,tr.clientWidth));idx=k;dots.forEach((d,j)=>d.classList.toggle("on",j==k))},{passive:true});
+  tr.addEventListener("touchstart",()=>{touched=true},{passive:true});
+  tr.addEventListener("touchend",()=>{setTimeout(()=>{touched=false},4000)},{passive:true});
+  document.querySelectorAll(".slide").forEach(sl=>sl.onclick=()=>{const b=banners[sl.dataset.b];if(!b||!b.target)return;const s=services.find(x=>x.slug==b.target);if(s)openService(s)});
+  if(n>1)slideTimer=setInterval(()=>{if(!touched&&tab=="home"&&document.hidden!==true)go(idx+1)},4200);
+}
+function openService(s){
+  if(!s)return;
+  if(s.slug=="neuf"||s.slug=="occasion"){sub=s.slug=="neuf"?"neuf":"occ";cat="all";q="";home();const t=$("#prodTop");if(t)t.scrollIntoView({behavior:"smooth"});return}
+  curSvc=s;svcQ="";setTab("service");
+}
+let curSvc=null,svcQ="";
+function serviceView(){
+  const s=curSvc;if(!s){setTab("home");return}
+  const its=(s.items||[]).map(it=>Array.isArray(it)?{name:it[0],description:it[1],price:0,img:""}:it).filter(it=>String(it.name).toLowerCase().includes(svcQ.toLowerCase()));
+  $("#view").innerHTML=`
+  <div style="padding:12px 16px 0;display:flex;align-items:center;gap:10px"><button class="ib" id="sb" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button><b style="font-size:17px">${s.i} ${esc(s.t)}</b></div>
+  <div class="search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="sq" placeholder="Rechercher dans ${esc(s.t)}" value="${esc(svcQ)}"></div>
+  <main>
+   <div class="hero" style="position:relative;overflow:hidden;padding:0;min-height:120px">${s.img?`<img src="${esc(s.img)}" alt="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.5">`:""}<div style="position:relative;padding:22px 20px"><h1>${esc(s.t)}</h1><p>${esc(s.s)}</p></div></div>
+   <div class="grid">${its.length?its.map((it,i)=>`<div class="pr"><div class="im" style="background:var(--tile)">${it.img?`<img src="${esc(it.img)}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover">`:s.i}</div><div class="in"><small>${esc(s.t)}</small><h3>${esc(it.name)}</h3>${it.description?`<small style="display:block;margin:-4px 0 8px">${esc(it.description)}</small>`:""}<div class="rw"><span class="price">${it.price?Number(it.price).toLocaleString("fr-FR")+" F":"Sur devis"}</span><button class="add" data-k="${i}">+</button></div></div></div>`).join(""):'<div class="empty">Rien pour le moment dans cette section.</div>'}</div>
+   <a class="btn o" target="_blank" rel="noopener" href="${wa(`Bonjour ODA Shop, service « ${s.t} ».\n${who()}Ville : ${city}`)}">Une demande particulière ? Écrivez-nous</a>
+   <footer>© 2026 ODA Shop</footer>
+  </main>`;
+  $("#sb").onclick=()=>setTab("home");
+  $("#sq").oninput=e=>{svcQ=e.target.value;const p=e.target.selectionStart;serviceView();const i=$("#sq");i.focus();i.setSelectionRange(p,p)};
+  document.querySelectorAll("#view .add").forEach(b=>b.onclick=()=>{const it=its[b.dataset.k];cart.push({n:it.name,p:it.price?Number(it.price).toLocaleString("fr-FR"):"Sur devis",svc:s.t});cartUI();toast("Ajouté ✓")});
+}
+async function sellFlow(){
+  if(!user){authSheet();toast("Connectez-vous pour publier");return}
+  openSheet('<h3>Publier un produit</h3><p class="s">Chargement…</p>');
+  const {data:shop,error}=await sbc.from("shops").select("*").eq("owner_id",uid).maybeSingle();
+  if(error){openSheet('<h3>Publier un produit</h3><p class="s">Erreur de chargement, réessayez.</p>');return}
+  if(shop&&shop.status=="approuvee"){sellerProduct(shop);return}
+  shopSheet();
+}
 function svc(){
   $("#view").innerHTML=`<main>
    <h2 style="margin-top:20px">Nos services</h2>
    ${services.map((s,i)=>`<button class="svc" data-i="${i}"><div class="svi">${s.i}</div><div><small>${s.k}</small><b>${s.t}</b><span>${s.s}</span></div></button>`).join("")}
    <h2>Pourquoi ODA Shop</h2>
    <div class="why"><div><b>Rapide</b><small>Livraison à ${esc(city)}</small></div><div><b>Sûr</b><small>Paiement livraison</small></div><div><b>Simple</b><small>Commande WhatsApp</small></div></div>
-   <footer>© 2026 ODA Shop</footer></main>`;
+   <button class="btn" onclick="shopSheet()">🏪 Vendre sur ODA Shop</button><footer>© 2026 ODA Shop</footer></main>`;
   document.querySelectorAll(".svc").forEach(b=>b.onclick=()=>{
     const s=services[b.dataset.i];
     if(s.go){const [,x]=s.go.split(":");sub=x;cat="all";q="";setTab("home");return}
@@ -270,16 +363,11 @@ function svc(){
   });
 }
 
-function clientKey(){
-  let k=store.get("oda_key");
-  if(!k){k=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c=="x"?r:r&3|8).toString(16)});store.set("oda_key",k)}
-  return k;
-}
 let chatTimer=null,chatCount=-1;
 async function loadChat(){
   const box=$("#chat");if(tab!="msg"||!box||!sbc)return;
   try{
-    const {data,error}=await sbc.rpc("get_client_messages",{p_key:clientKey()});
+    const {data,error}=await sbc.rpc("get_client_messages");
     if(error||!data)return;
     if(data.length===chatCount)return;
     chatCount=data.length;
@@ -300,32 +388,129 @@ function msg(){
   $("#sf").onsubmit=async e=>{
     e.preventDefault();const inp=$("#mi"),v=inp.value.trim();if(!v)return;
     inp.value="";
-    const {error}=await sbc.rpc("send_client_message",{p_key:clientKey(),p_name:user.name,p_phone:user.phone||null,p_body:v});
+    const {error}=await sbc.rpc("send_client_message",{p_body:v});
     if(error){inp.value=v;toast("Message non envoyé, réessayez");return}
     chatCount=-1;await loadChat();
   };
   chatCount=-1;loadChat();clearInterval(chatTimer);chatTimer=setInterval(loadChat,5000);
 }
 
-function authSheet(){
-  openSheet(`<h3>Créer mon compte</h3><p class="s">Votre nom s'affichera en haut de l'application.</p>
-  <input class="fld" id="an" placeholder="Votre prénom" autocomplete="given-name">
-  <input class="fld" id="ap" placeholder="Téléphone / WhatsApp" inputmode="tel" autocomplete="tel">
-  <button class="btn" id="as">Continuer</button>`);
-  $("#as").onclick=()=>{const n=$("#an").value.trim();if(!n){toast("Entrez votre prénom");return}
-    user={name:n,phone:$("#ap").value.trim()};store.set("oda_user",JSON.stringify(user));closeSheet();render();toast("Bienvenue "+n+" 👋")};
+function authSheet(mode){
+  mode=mode||"signup";const su=mode=="signup";
+  openSheet(`<h3>${su?"Créer mon compte":"Se connecter"}</h3><p class="s">${su?"Votre prénom s'affichera en haut de l'application.":"Entrez votre numéro et votre mot de passe."}</p>
+  ${su?'<input class="fld" id="an" placeholder="Votre prénom" autocomplete="given-name">':""}
+  <input class="fld" id="ap" placeholder="Téléphone / WhatsApp (ex : 227XXXXXXXX)" inputmode="tel" autocomplete="tel">
+  <input class="fld" id="aw" type="password" placeholder="Mot de passe${su?" (6 caractères minimum)":""}" autocomplete="${su?"new-password":"current-password"}">
+  <button class="btn" id="as">${su?"Créer mon compte":"Se connecter"}</button>
+  <button class="btn o" id="sw">${su?"J'ai déjà un compte":"Créer un compte"}</button>`);
+  $("#sw").onclick=()=>authSheet(su?"login":"signup");
+  $("#as").onclick=async()=>{
+    const btn=$("#as"),phone=$("#ap").value.trim(),pw=$("#aw").value;
+    if(phone.replace(/\D/g,"").length<8){toast("Numéro invalide");return}
+    if(pw.length<6){toast("Mot de passe : 6 caractères minimum");return}
+    if(!sbc){toast("Connexion impossible");return}
+    btn.disabled=true;
+    try{
+      if(su){
+        const name=$("#an").value.trim();if(!name){toast("Entrez votre prénom");btn.disabled=false;return}
+        const r=await fetch(SB_URL+"/functions/v1/client-signup",{method:"POST",headers:{"Content-Type":"application/json",apikey:SB_KEY,Authorization:"Bearer "+SB_KEY},body:JSON.stringify({name,phone,password:pw})});
+        const j=await r.json().catch(()=>({}));
+        if(!r.ok){toast(j.error||"Création impossible");btn.disabled=false;return}
+      }
+      const {data,error}=await sbc.auth.signInWithPassword({email:emailOf(phone),password:pw});
+      if(error){toast("Numéro ou mot de passe incorrect");btn.disabled=false;return}
+      applySession(data.session);closeSheet();render();toast("Bienvenue "+user.name+" 👋");
+    }catch(e){toast("Erreur réseau, réessayez");btn.disabled=false}
+  };
+}
+/* ---------- Espace vendeur ---------- */
+const BD={en_attente:"En attente",approuve:"Publié",refuse:"Refusé",approuvee:"Approuvée",refusee:"Refusée",suspendue:"Suspendue"};
+const bd=s=>`<span class="bd ${s=="approuve"||s=="approuvee"?"ok":(s=="refuse"||s=="refusee"||s=="suspendue")?"no":""}">${BD[s]||s}</span>`;
+async function shopSheet(){
+  if(!user){authSheet();toast("Créez d'abord votre compte");return}
+  openSheet('<h3>🏪 Ma boutique</h3><p class="s">Chargement…</p>');
+  const {data:shop,error}=await sbc.from("shops").select("*").eq("owner_id",uid).maybeSingle();
+  if(error){openSheet('<h3>🏪 Ma boutique</h3><p class="s">Erreur de chargement, réessayez.</p>');return}
+  if(!shop){
+    openSheet(`<h3>🏪 Créer ma boutique</h3><p class="s">Créez votre boutique en quelques secondes. Vos produits seront publiés après validation par ODA Shop.</p>
+    <input class="fld" id="sn" placeholder="Nom de la boutique" maxlength="60">
+    <textarea class="fld" id="sd" rows="3" placeholder="Que vendez-vous ?" maxlength="500"></textarea>
+    <input class="fld" id="sp" placeholder="Téléphone de la boutique" inputmode="tel" value="${esc(user.phone||"")}">
+    <select class="fld" id="sc">${cities.map(c=>`<option ${c==city?"selected":""}>${esc(c)}</option>`).join("")}</select>
+    <button class="btn" id="sv">Créer ma boutique</button>`);
+    $("#sv").onclick=async()=>{
+      const name=$("#sn").value.trim();if(name.length<2){toast("Entrez le nom de la boutique");return}
+      $("#sv").disabled=true;
+      const {data:ns,error}=await sbc.from("shops").insert({owner_id:uid,name,description:$("#sd").value.trim()||null,phone:$("#sp").value.trim()||null,city:$("#sc").value,status:"approuvee"}).select().single();
+      if(error||!ns){toast("Erreur, réessayez");$("#sv").disabled=false;return}
+      toast("Boutique créée ✓");sellerProduct(ns);
+    };
+    return;
+  }
+  if(shop.status!="approuvee"){
+    const msg={en_attente:"⏳ Votre demande est en cours de vérification. Vous pourrez publier vos produits dès qu'elle sera approuvée.",refusee:"Votre demande n'a pas été acceptée."+(shop.reject_reason?" Motif : "+esc(shop.reject_reason):""),suspendue:"Votre boutique est suspendue. Contactez ODA Shop."}[shop.status];
+    openSheet(`<h3>🏪 ${esc(shop.name)}</h3><p class="s">${bd(shop.status)}</p><p class="s" style="line-height:1.5">${msg}</p><a class="btn o" target="_blank" rel="noopener" href="${wa("Bonjour ODA Shop, ma boutique « "+shop.name+" ».")}">Contacter ODA Shop</a>`);
+    return;
+  }
+  const {data:ps}=await sbc.from("products").select("*").eq("shop_id",shop.id).order("created_at",{ascending:false});
+  openSheet(`<h3>🏪 ${esc(shop.name)}</h3><p class="s">${bd("approuvee")} · Chaque produit est publié après validation par ODA Shop.</p>
+  <button class="btn" id="np">+ Ajouter un produit</button>
+  ${(ps||[]).map(p=>`<div class="li" data-p="${p.id}" style="cursor:pointer"><div>${esc(p.name)}<small>${Number(p.price).toLocaleString("fr-FR")} F · stock ${p.stock}${p.reject_reason?" · "+esc(p.reject_reason):""}</small></div>${bd(p.status)}</div>`).join("")||'<p class="s" style="margin-top:14px">Aucun produit pour le moment.</p>'}`);
+  $("#np").onclick=()=>sellerProduct(shop);
+  document.querySelectorAll("[data-p]").forEach(r=>r.onclick=()=>sellerProduct(shop,(ps||[]).find(p=>p.id==r.dataset.p)));
+}
+function sellerProduct(shop,p){
+  const e=!!p;p=p||{name:"",price:"",section:"neuf",category:"",stock:1,description:"",image_url:"",telegram_file_id:null};
+  let img=p.image_url,fid=p.telegram_file_id;
+  openSheet(`<h3>${e?"Modifier":"Nouveau"} produit</h3><p class="s">${e?"Après modification, le produit repasse en validation.":"Votre produit sera visible dès qu'ODA Shop l'aura validé."}</p>
+  <div style="display:flex;gap:12px;align-items:center;margin-top:10px"><div id="pv" style="width:72px;height:72px;border-radius:14px;background:var(--card);display:grid;place-items:center;overflow:hidden;font-size:26px">${img?`<img src="${esc(img)}" style="width:100%;height:100%;object-fit:cover">`:"📷"}</div><div><input type="file" id="fi" accept="image/*" hidden><button class="go" id="pk" style="background:none;border:1px solid var(--line);color:var(--txt);font-weight:700;font-size:12px;border-radius:10px;padding:8px 12px">Choisir une photo</button><div id="up" style="font-size:12px;color:var(--mut);margin-top:4px"></div></div></div>
+  <label class="lb">Nom</label><input class="fld" id="n" maxlength="100" value="${esc(p.name)}">
+  <label class="lb">Prix (F)</label><input class="fld" id="pr" type="number" inputmode="numeric" value="${p.price}">
+  <label class="lb">Section</label><select class="fld" id="se"><option value="neuf" ${p.section=="neuf"?"selected":""}>Neuf</option><option value="occasion" ${p.section=="occasion"?"selected":""}>Occasion</option></select>
+  <label class="lb">Catégorie</label><input class="fld" id="ca" value="${esc(p.category)}" placeholder="Téléphones, Meubles, Vêtements…">
+  <label class="lb">Stock</label><input class="fld" id="sk" type="number" inputmode="numeric" value="${p.stock}">
+  <label class="lb">Description</label><textarea class="fld" id="de" rows="3">${esc(p.description||"")}</textarea>
+  <button class="btn" id="sv">Publier</button>${e?'<button class="btn o" id="dl" style="border-color:#ef4444;color:#ef4444">Supprimer</button>':""}<button class="btn o" id="bk">Retour</button>`);
+  $("#bk").onclick=shopSheet;
+  $("#pk").onclick=()=>$("#fi").click();
+  $("#fi").onchange=async ev=>{
+    const f=ev.target.files[0];if(!f)return;$("#up").textContent="Envoi de la photo…";
+    try{
+      const {data:{session}}=await sbc.auth.getSession();
+      const fd=new FormData();fd.append("file",f);
+      const r=await fetch(SB_URL+"/functions/v1/tg-upload",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,apikey:SB_KEY},body:fd});
+      const j=await r.json().catch(()=>({}));
+      if(!r.ok||!j.file_id){$("#up").textContent="Erreur : "+(j.error||r.status);return}
+      fid=j.file_id;img=SB_URL+"/functions/v1/tg-image?id="+encodeURIComponent(fid);
+      $("#pv").innerHTML=`<img src="${URL.createObjectURL(f)}" style="width:100%;height:100%;object-fit:cover">`;$("#up").textContent="Photo envoyée ✓";
+    }catch(x){$("#up").textContent="Erreur réseau, réessayez"}
+  };
+  $("#sv").onclick=async()=>{
+    const row={name:$("#n").value.trim(),price:+$("#pr").value||0,section:$("#se").value,category:$("#ca").value.trim()||"Divers",stock:+$("#sk").value||0,description:$("#de").value.trim()||null,image_url:img||null,telegram_file_id:fid,status:"en_attente",active:false,reject_reason:null};
+    if(!row.name){toast("Entrez un nom");return}
+    if(!img){toast("Ajoutez une photo");return}
+    $("#sv").disabled=true;
+    const q=e?sbc.from("products").update(row).eq("id",p.id):sbc.from("products").insert({...row,shop_id:shop.id});
+    const {error}=await q;
+    if(error){toast("Erreur, réessayez");$("#sv").disabled=false;return}
+    toast("Produit envoyé, en attente de validation ✓");shopSheet();
+  };
+  if(e)$("#dl").onclick=async()=>{if(!confirm("Supprimer ce produit ?"))return;const {error}=await sbc.from("products").delete().eq("id",p.id);if(error){toast("Erreur");return}toast("Supprimé");shopSheet()};
 }
 $("#menu").onclick=()=>openSheet(`<h3>Menu</h3>
   <div class="li"><div>${user?esc(user.name):"Non connecté"}<small>${user?esc(user.phone||"Compte ODA Shop"):"Créez un compte pour profiter de tout"}</small></div>${user?'<button class="go" id="lo">Déconnexion</button>':'<button class="go" onclick="authSheet()">Créer</button>'}</div>
+  <div class="li"><div>Apparence<small>${theme=="dark"?"Mode sombre":"Mode clair"}</small></div><button class="go" onclick="toggleTheme()">${theme=="dark"?"Passer en clair":"Passer en sombre"}</button></div>
+  <div class="li"><div>Ma boutique<small>Vendre vos produits sur ODA Shop</small></div><button class="go" onclick="shopSheet()">Ouvrir</button></div>
   <div class="li"><div>Ville<small>${esc(city)}</small></div><button class="go" onclick="citySheet()">Changer</button></div>
   <div class="li"><div>Nous contacter<small>WhatsApp et appel</small></div><a class="go" target="_blank" rel="noopener" href="${wa("Bonjour ODA Shop")}">WhatsApp</a></div>`);
-document.addEventListener("click",e=>{if(e.target.id=="lo"){user=null;store.del("oda_user");chat=chat.slice(0,1);closeSheet();render()}});
+document.addEventListener("click",e=>{if(e.target.id=="lo"){(async()=>{try{await sbc.auth.signOut()}catch(x){}applySession(null);closeSheet();render()})()}});
 function citySheet(){
   openSheet(`<h3>🛵 Commander vers une autre ville</h3><p class="s">Choisissez la ville de livraison.</p>`+cities.map(c=>`<div class="li"><div>${c}</div><button class="go" onclick="setCity('${c}')">${c==city?"✓ Choisie":"Choisir"}</button></div>`).join(""));
 }
 function setCity(c){city=c;store.set("oda_city",c);closeSheet();render();toast("Ville : "+c)}
 $("#otherCity").onclick=citySheet;
 setTab("home");
+initAuth();
 loadRemote();
 </script>
 </body>
