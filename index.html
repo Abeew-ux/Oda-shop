@@ -212,7 +212,7 @@ function header(){
   $("#call").href="tel:+"+WA;
   $("#greet").innerHTML=user?`<b>Bienvenue <span>${esc(user.name)}</span></b><small>${esc(city)}</small>`:`<button class="login" onclick="authSheet()">Créer mon compte</button>`;
 }
-function setTab(t){tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));render();scrollTo(0,0)}
+function setTab(t){clearInterval(chatTimer);tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));render();scrollTo(0,0)}
 document.querySelectorAll("nav button").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
 
 function render(){header();({home,msg,svc})[tab]()}
@@ -270,15 +270,41 @@ function svc(){
   });
 }
 
+function clientKey(){
+  let k=store.get("oda_key");
+  if(!k){k=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():"xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g,c=>{const r=Math.random()*16|0;return(c=="x"?r:r&3|8).toString(16)});store.set("oda_key",k)}
+  return k;
+}
+let chatTimer=null,chatCount=-1;
+async function loadChat(){
+  const box=$("#chat");if(tab!="msg"||!box||!sbc)return;
+  try{
+    const {data,error}=await sbc.rpc("get_client_messages",{p_key:clientKey()});
+    if(error||!data)return;
+    if(data.length===chatCount)return;
+    chatCount=data.length;
+    const near=box.scrollHeight-box.scrollTop-box.clientHeight<80;
+    box.innerHTML=`<div class="bub ot">${esc(chat[0].m)}</div>`+data.map(c=>`<div class="bub ${c.sender=="client"?"me":"ot"}">${esc(c.body)}</div>`).join("");
+    if(near)scrollTo(0,document.body.scrollHeight);
+  }catch(e){}
+}
 function msg(){
   if(!user){
     $("#view").innerHTML=`<main><div class="lock"><div>💬</div><b style="color:var(--txt);font-size:18px">Vos messages</b><p style="margin-top:6px;font-size:14px">Créez un compte pour discuter avec ODA Shop.</p><button class="btn" onclick="authSheet()">Créer mon compte</button></div></main>`;return}
   $("#view").innerHTML=`<main>
    <button class="conv"><div class="av">ODA</div><div><b>Support ODA Shop</b><small>En ligne · réponse rapide</small></div></button>
-   <div class="chat" id="chat">${chat.map(c=>`<div class="bub ${c.me?"me":"ot"}">${esc(c.m)}</div>`).join("")}</div>
+   <div class="chat" id="chat"><div class="bub ot">${esc(chat[0].m)}</div></div>
+   <p class="mut" style="font-size:11px;text-align:center;color:var(--mut)">Les messages sont supprimés automatiquement après 7 jours.</p>
    <form class="send" id="sf"><input id="mi" placeholder="Écrire un message…" autocomplete="off"><button>Envoyer</button></form>
    <a class="btn o" target="_blank" rel="noopener" href="${wa("Bonjour ODA Shop, je suis "+user.name)}">Continuer sur WhatsApp</a></main>`;
-  $("#sf").onsubmit=e=>{e.preventDefault();const v=$("#mi").value.trim();if(!v)return;chat.push({m:v,me:true});msg();setTimeout(()=>{chat.push({m:"Merci ! Un conseiller vous répond très bientôt.",me:false});if(tab=="msg")msg()},900)};
+  $("#sf").onsubmit=async e=>{
+    e.preventDefault();const inp=$("#mi"),v=inp.value.trim();if(!v)return;
+    inp.value="";
+    const {error}=await sbc.rpc("send_client_message",{p_key:clientKey(),p_name:user.name,p_phone:user.phone||null,p_body:v});
+    if(error){inp.value=v;toast("Message non envoyé, réessayez");return}
+    chatCount=-1;await loadChat();
+  };
+  chatCount=-1;loadChat();clearInterval(chatTimer);chatTimer=setInterval(loadChat,5000);
 }
 
 function authSheet(){
