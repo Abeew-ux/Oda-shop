@@ -146,6 +146,27 @@ body.vmode header{display:none}
 @media(max-width:480px){.vmute{right:14px}}
 .vtop{position:fixed;top:14px;left:calc(50% - 240px + 16px);z-index:27;color:#fff;font-weight:800;font-size:17px;text-shadow:0 1px 6px #000}
 @media(max-width:480px){.vtop{left:16px}}
+/* page boutique */
+.sp-cover{height:120px;background:radial-gradient(120% 140% at 100% 0,#e8b23a88,transparent 60%),linear-gradient(135deg,#2a2412,#0f0f10);position:relative}
+.sp-back{position:absolute;top:12px;left:12px}
+.sp-head{padding:0 16px;margin-top:-38px;position:relative}
+.sp-av{width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#e8b23a,#b8821a);color:#111;font-weight:900;font-size:34px;display:grid;place-items:center;border:4px solid var(--bg)}
+.sp-head h1{font-size:22px;margin-top:8px;letter-spacing:-.4px}
+.sp-head p{color:var(--mut);font-size:13.5px;margin-top:4px;line-height:1.45}
+.sp-stats{display:flex;gap:22px;margin:12px 0}.sp-stats b{display:block;font-size:18px}.sp-stats span{font-size:12px;color:var(--mut)}
+.sp-act{display:flex;gap:8px;flex-wrap:wrap}.sp-act .btn{width:auto;margin:0;padding:10px 16px;font-size:13px;flex:1;white-space:nowrap}
+.sp-tabs{display:flex;border-bottom:1px solid var(--line);margin-top:16px;position:sticky;top:0;background:var(--bg);z-index:5}
+.sp-tabs button{flex:1;padding:13px 0;font-weight:700;color:var(--mut);border-bottom:3px solid transparent;font-size:14px}
+.sp-tabs button.on{color:var(--txt);border-color:var(--g)}
+.vgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:3px;padding:3px 0}
+.vt{position:relative;aspect-ratio:9/14;background:#111;overflow:hidden;cursor:pointer;display:grid;place-items:center;color:#fff}
+.vt video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;pointer-events:none}
+.vt .vc{position:absolute;left:0;right:0;bottom:0;padding:18px 6px 5px;font-size:11px;font-weight:700;background:linear-gradient(transparent,#000c);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.vt .bd{position:absolute;top:6px;left:6px}
+.vt .pl{position:absolute;top:6px;right:8px;font-size:12px}
+#vv{position:fixed;inset:0;z-index:80;background:#000;max-width:480px;margin:auto}
+#vv .vfeed{bottom:0;z-index:81;max-width:none;left:0;transform:none;width:100%}
+#vv .vx{position:absolute;top:14px;left:14px;z-index:90;width:40px;height:40px;border-radius:50%;background:#0008;color:#fff;font-size:18px}
 .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--txt);color:var(--bg);box-shadow:0 6px 20px #0003;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:70;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style>
@@ -254,13 +275,13 @@ async function loadRemote(){
       sbc.from("settings").select("*")]);
     if(p.error)throw p.error;
     const g=["#e8b23a,#4a3510","#38bdf8,#0c3550","#8b5cf6,#2a1856","#22c55e,#0f3d20"],m={neuf:[],occ:[]};
-    const shR=await sbc.from("shops").select("id,name");const shM=Object.fromEntries((shR.data||[]).map(z=>[z.id,z.name]));
-    p.data.forEach((x,k)=>m[x.section=="neuf"?"neuf":"occ"].push({id:x.id,shop:shM[x.shop_id]||"",n:x.name,p:Number(x.price).toLocaleString("fr-FR"),e:"📦",img:x.image_url,c:x.category||"Divers",g:g[k%4]}));
+    const shR=await sbc.from("shops").select("id,name,description,city,phone,owner_id,status");const shM=Object.fromEntries((shR.data||[]).map(z=>[z.id,z.name]));shopsMap=Object.fromEntries((shR.data||[]).map(z=>[z.id,z]));
+    p.data.forEach((x,k)=>m[x.section=="neuf"?"neuf":"occ"].push({id:x.id,sid:x.shop_id,shop:shM[x.shop_id]||"",n:x.name,p:Number(x.price).toLocaleString("fr-FR"),e:"📦",img:x.image_url,c:x.category||"Divers",g:g[k%4]}));
     prods=m;
     try{
       const vr=await sbc.from("videos").select("*").order("created_at",{ascending:false}).limit(40);
       const all=[...m.neuf,...m.occ];
-      vids=(vr.data||[]).filter(v=>v.active&&v.status=="approuve").map(v=>({id:v.id,fid:v.telegram_file_id,shop:v.shop_name||"",cap:v.caption||"",prod:all.find(p=>p.id==v.product_id)||null}));
+      vids=(vr.data||[]).filter(v=>v.active&&v.status=="approuve").map(v=>({id:v.id,sid:v.shop_id,fid:v.telegram_file_id,shop:v.shop_name||"",cap:v.caption||"",prod:all.find(p=>p.id==v.product_id)||null}));
     }catch(e){vids=[]}
     if(s.data&&s.data.length)services=s.data.map(x=>({slug:x.slug,k:x.label,t:x.title,s:x.subtitle||"",i:x.icon||"🧰",cta:x.cta||"Commander",img:x.image_url||"",items:(i.data||[]).filter(y=>y.service_id==x.id).map(y=>({name:y.name,description:y.description||"",price:Number(y.price)||0,img:y.image_url||""}))}));
     if(c.data&&c.data.length)cities=c.data.map(x=>x.name);
@@ -285,7 +306,7 @@ function setTab(t){stopVids();document.body.classList.toggle('vmode',t=='vid');c
 document.querySelectorAll("nav button[data-t]").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
 $("#fab").onclick=()=>sellFlow();
 
-function render(){header();({home,msg,svc,service:serviceView,vid:vidView})[tab]()}
+function render(){header();({home,msg,svc,service:serviceView,vid:vidView,shop:shopView})[tab]()}
 const pf=p=>/\d/.test(String(p))?p+" F":p;
 
 function home(){
@@ -301,7 +322,7 @@ function home(){
    <div class="tiles">${services.map((s,i)=>`<button class="tile" data-i="${i}">${s.img?`<img src="${esc(s.img)}" alt="" loading="lazy">`:s.i}<span>${esc(s.t)}</span></button>`).join("")}</div>
    <div class="seg" id="prodTop"><button class="${sub=="neuf"?"on":""}" data-s="neuf">Boutique neuve</button><button class="${sub=="occ"?"on":""}" data-s="occ">Marché occasion</button></div>
    <div class="chips">${cats.map(c=>`<button class="chip ${c==cat?"on":""}" data-c="${c}">${c=="all"?"Tout":c}</button>`).join("")}</div>
-   <div class="grid">${f.length?f.map((x,i)=>`<div class="pr"><div class="im" style="background:linear-gradient(135deg,${x.g})">${x.img?`<img src="${esc(x.img)}" alt="" style="width:100%;height:100%;object-fit:cover">`:x.e}</div><div class="in"><small>${sub=="neuf"?"Neuf":"Occasion"} · ${x.c}${x.shop?" · 🏪 "+esc(x.shop):""}</small><h3>${x.n}</h3><div class="rw"><span class="price">${x.p} F</span><button class="add" data-n="${esc(x.n)}" data-p="${x.p}">+</button></div></div></div>`).join(""):'<div class="empty">Aucun article trouvé.</div>'}</div>
+   <div class="grid">${f.length?f.map((x,i)=>`<div class="pr"><div class="im" style="background:linear-gradient(135deg,${x.g})">${x.img?`<img src="${esc(x.img)}" alt="" style="width:100%;height:100%;object-fit:cover">`:x.e}</div><div class="in"><small>${sub=="neuf"?"Neuf":"Occasion"} · ${x.c}${x.shop?` · <a data-shop="${x.sid}" style="text-decoration:underline">🏪 ${esc(x.shop)}</a>`:""}</small><h3>${x.n}</h3><div class="rw"><span class="price">${x.p} F</span><button class="add" data-n="${esc(x.n)}" data-p="${x.p}">+</button></div></div></div>`).join(""):'<div class="empty">Aucun article trouvé.</div>'}</div>
    <h2>Pourquoi ODA Shop</h2>
    <div class="why"><div><b>Rapide</b><small>Livraison à ${esc(city)}</small></div><div><b>Sûr</b><small>Paiement livraison</small></div><div><b>Simple</b><small>Commande WhatsApp</small></div></div>
    <footer>© 2026 ODA Shop · Livraison à Agadez · Payez et faites-vous livrer<br>Maquette de démonstration — produits et prix fictifs</footer>
@@ -478,6 +499,7 @@ async function shopSheet(){
     openSheet(`<h3>🏪 ${esc(shop.name)}</h3><p class="s">${bd(shop.status)}</p><p class="s" style="line-height:1.5">${msg}</p><a class="btn o" target="_blank" rel="noopener" href="${wa("Bonjour ODA Shop, ma boutique « "+shop.name+" ».")}">Contacter ODA Shop</a>`);
     return;
   }
+  closeSheet();openShop(shop.id,shop);return;
   const {data:ps}=await sbc.from("products").select("*").eq("shop_id",shop.id).order("created_at",{ascending:false});
   openSheet(`<h3>🏪 ${esc(shop.name)}</h3><p class="s">${bd("approuvee")} · Chaque produit est publié après validation par ODA Shop.</p>
   <button class="btn" id="np">+ Ajouter un produit</button>
@@ -530,22 +552,82 @@ function sellerProduct(shop,p){
 let vids=[],vmuted=true,vObs=null;
 const vurl=id=>SB_URL+"/functions/v1/tg-video?id="+encodeURIComponent(id);
 function stopVids(){if(vObs){vObs.disconnect();vObs=null}document.querySelectorAll("#view video").forEach(v=>{try{v.pause()}catch(e){}})}
-function vidView(){
-  $("#view").innerHTML=`<div class="vtop">Vidéos</div><div class="vfeed" id="vf">${vids.length?vids.map((v,i)=>`<section class="vi paused" data-i="${i}"><video playsinline loop preload="none" ${vmuted?"muted":""} data-id="${esc(v.fid)}"></video><div class="vplay">▶</div><div class="vinfo"><b>🏪 ${esc(v.shop||"ODA Shop")}</b>${v.cap?`<p>${esc(v.cap)}</p>`:""}${v.prod?`<div class="vprod"><div><b>${esc(v.prod.n)}</b><span>${v.prod.p} F</span></div><button data-a="${i}">Commander</button></div>`:""}</div></section>`).join(""):`<div style="color:#fff;text-align:center;margin-top:38vh;padding:0 30px;line-height:1.6">🎬<br><b>Aucune vidéo pour le moment</b><br><span style="color:#bbb;font-size:13px">Les vendeurs peuvent en publier avec le bouton +.</span></div>`}</div><button class="vmute" id="vm" aria-label="Son">${vmuted?"🔇":"🔊"}</button>`;
-  const vf=$("#vf");
-  $("#vm").onclick=()=>{vmuted=!vmuted;$("#vm").textContent=vmuted?"🔇":"🔊";document.querySelectorAll(".vi video").forEach(v=>v.muted=vmuted)};
+function feedHTML(list){return list.map((v,i)=>`<section class="vi paused" data-i="${i}"><video playsinline loop preload="none" ${vmuted?"muted":""} data-id="${esc(v.fid)}"></video><div class="vplay">▶</div><div class="vinfo"><button data-shop="${v.sid||""}" style="color:#fff;font-weight:800;font-size:15px;text-align:left">🏪 ${esc(v.shop||"ODA Shop")} ›</button>${v.cap?`<p>${esc(v.cap)}</p>`:""}${v.prod?`<div class="vprod"><div><b>${esc(v.prod.n)}</b><span>${v.prod.p} F</span></div><button data-a="${i}">Commander</button></div>`:""}</div></section>`).join("")}
+function bindFeed(vf,list){
   vf.querySelectorAll(".vi").forEach(sec=>{
     const v=sec.querySelector("video");
     v.onplay=()=>sec.classList.remove("paused");v.onpause=()=>sec.classList.add("paused");
     sec.onclick=e=>{if(e.target.closest("button"))return;v.paused?v.play().catch(()=>{}):v.pause()};
   });
-  vf.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const p=vids[b.dataset.a].prod;cart.push({n:p.n,p:p.p});cartUI();toast("Ajouté ✓")});
+  vf.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const p=list[b.dataset.a].prod;cart.push({n:p.n,p:p.p});cartUI();toast("Ajouté ✓")});
+  if(vObs)vObs.disconnect();
   vObs=new IntersectionObserver(es=>es.forEach(en=>{
     const v=en.target.querySelector("video");
     if(en.isIntersecting){if(!v.src)v.src=vurl(v.dataset.id);v.muted=vmuted;v.play().catch(()=>{})}else{v.pause()}
   }),{root:vf,threshold:.65});
   vf.querySelectorAll(".vi").forEach(x=>vObs.observe(x));
 }
+function vidView(){
+  $("#view").innerHTML=`<div class="vtop">Vidéos</div><div class="vfeed" id="vf">${vids.length?feedHTML(vids):`<div style="color:#fff;text-align:center;margin-top:38vh;padding:0 30px;line-height:1.6">🎬<br><b>Aucune vidéo pour le moment</b><br><span style="color:#bbb;font-size:13px">Les vendeurs peuvent en publier avec le bouton +.</span></div>`}</div><button class="vmute" id="vm" aria-label="Son">${vmuted?"🔇":"🔊"}</button>`;
+  $("#vm").onclick=()=>{vmuted=!vmuted;$("#vm").textContent=vmuted?"🔇":"🔊";document.querySelectorAll(".vi video").forEach(v=>v.muted=vmuted)};
+  bindFeed($("#vf"),vids);
+}
+function openViewer(list,idx){
+  closeViewer();
+  const d=document.createElement("div");d.id="vv";
+  d.innerHTML=`<button class="vx" aria-label="Fermer">✕</button><div class="vfeed" id="vf2">${feedHTML(list)}</div>`;
+  document.body.appendChild(d);
+  d.querySelector(".vx").onclick=closeViewer;
+  const vf=d.querySelector("#vf2");bindFeed(vf,list);
+  vf.scrollTop=idx*vf.clientHeight;
+}
+function closeViewer(){const d=$("#vv");if(d){d.querySelectorAll("video").forEach(v=>{try{v.pause();v.removeAttribute("src");v.load()}catch(e){}});d.remove()}if(vObs){vObs.disconnect();vObs=null}}
+/* ---------- Page boutique ---------- */
+let shopsMap={},curShop=null,shopTab="prod",shopData=null,prevTab="home";
+async function openShop(id,row){
+  if(row)shopsMap[id]=row;
+  if(!shopsMap[id]){toast("Boutique introuvable");return}
+  closeViewer();closeSheet();
+  if(tab!="shop")prevTab=tab;
+  curShop=id;shopTab="prod";shopData=null;setTab("shop");
+}
+async function shopView(){
+  const sh=shopsMap[curShop];if(!sh){setTab("home");return}
+  const mine=!!uid&&sh.owner_id==uid;
+  if(!shopData){
+    $("#view").innerHTML=`<div class="sp-cover"></div><div class="empty" style="margin-top:40px">Chargement…</div>`;
+    const [p,v]=await Promise.all([
+      sbc.from("products").select("*").eq("shop_id",curShop).order("created_at",{ascending:false}),
+      sbc.from("videos").select("*").eq("shop_id",curShop).order("created_at",{ascending:false}).limit(60)]);
+    if(tab!="shop"||curShop!=sh.id)return;
+    shopData={p:(p.data||[]).filter(x=>mine||x.active),v:(v.data||[]).filter(x=>mine||(x.active&&x.status=="approuve"))};
+  }
+  const P=shopData.p,V=shopData.v,pubV=V.filter(x=>x.active&&x.status=="approuve");
+  const ph=String(sh.phone||"").replace(/\D/g,"");
+  const vlist=pubV.map(v=>({id:v.id,fid:v.telegram_file_id,sid:v.shop_id,shop:sh.name,cap:v.caption||"",prod:(()=>{const p=P.find(z=>z.id==v.product_id);return p?{n:p.name,p:Number(p.price).toLocaleString("fr-FR")}:null})()}));
+  $("#view").innerHTML=`<div class="sp-cover"><button class="ib sp-back" id="sbk" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button></div>
+  <div class="sp-head"><div class="sp-av">${esc((sh.name||"?").trim().charAt(0).toUpperCase())}</div>
+   <h1>${esc(sh.name)}</h1><p>${esc(sh.city||"")}${sh.description?" · "+esc(sh.description):""}</p>
+   <div class="sp-stats"><div><b>${P.filter(x=>x.active).length}</b><span>Produits</span></div><div><b>${pubV.length}</b><span>Vidéos</span></div></div>
+   <div class="sp-act">${mine?`<button class="btn" id="sap">+ Produit</button><button class="btn" id="sav">🎬 Vidéo</button>`:""}${ph?`<a class="btn ${mine?"o":""}" href="tel:+${ph}">📞 Appeler</a><a class="btn o" target="_blank" rel="noopener" href="${wa("Bonjour, je vous contacte depuis ODA Shop (boutique « "+sh.name+" »).")}">WhatsApp</a>`:""}</div></div>
+  <div class="sp-tabs"><button data-st="prod" class="${shopTab=="prod"?"on":""}">🛍️ Produits</button><button data-st="vid" class="${shopTab=="vid"?"on":""}">🎬 Vidéos</button></div>
+  <main style="padding-top:12px">${shopTab=="prod"?
+   (P.length?`<div class="grid">${P.map((x,i)=>`<div class="pr" ${mine?`data-ep="${i}" style="cursor:pointer"`:""}><div class="im" style="background:var(--tile)">${x.image_url?`<img src="${esc(x.image_url)}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover">`:"📦"}</div><div class="in"><small>${x.section=="neuf"?"Neuf":"Occasion"} · ${esc(x.category||"")}${mine?" · "+bd(x.status):""}</small><h3>${esc(x.name)}</h3><div class="rw"><span class="price">${Number(x.price).toLocaleString("fr-FR")} F</span>${!mine&&x.active?`<button class="add" data-n="${esc(x.name)}" data-p="${Number(x.price).toLocaleString("fr-FR")}">+</button>`:""}</div></div></div>`).join("")}</div>`:`<div class="empty">Aucun produit pour le moment.</div>`):
+   (V.length?`<div class="vgrid">${V.map((v,i)=>{const ok=v.active&&v.status=="approuve";return `<div class="vt" data-v="${i}">${ok?`<video muted playsinline preload="metadata" src="${vurl(v.telegram_file_id)}#t=0.3"></video><span class="pl">▶ ${v.duration}s</span>`:`<span style="font-size:26px">${v.status=="refuse"?"❌":"⏳"}</span>`}${mine&&!ok?bd(v.status):""}<div class="vc">${esc(v.caption||"")}</div></div>`}).join("")}</div>`:`<div class="empty">Aucune vidéo pour le moment.</div>`)}
+  <footer>© 2026 ODA Shop</footer></main>`;
+  $("#sbk").onclick=()=>setTab(prevTab||"home");
+  document.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{shopTab=b.dataset.st;shopView()});
+  if(mine){$("#sap").onclick=()=>sellerProduct(sh);$("#sav").onclick=()=>videoSheet(sh)}
+  document.querySelectorAll("#view .add").forEach(b=>b.onclick=()=>{cart.push({n:b.dataset.n,p:b.dataset.p});cartUI();toast("Ajouté ✓")});
+  document.querySelectorAll("[data-ep]").forEach(c=>c.onclick=()=>sellerProduct(sh,P[c.dataset.ep]));
+  document.querySelectorAll("[data-v]").forEach(c=>c.onclick=()=>{
+    const v=V[c.dataset.v];
+    if(v.active&&v.status=="approuve"){openViewer(vlist,pubV.findIndex(z=>z.id==v.id));return}
+    openSheet(`<h3>🎬 Vidéo</h3><p class="s">${bd(v.status)}${v.reject_reason?" · "+esc(v.reject_reason):""}</p><p class="s">${esc(v.caption||"(sans légende)")}</p><button class="btn o" id="vd" style="border-color:#ef4444;color:#ef4444">Supprimer cette vidéo</button>`);
+    $("#vd").onclick=async()=>{if(!confirm("Supprimer cette vidéo ?"))return;const {error}=await sbc.from("videos").delete().eq("id",v.id);if(error){toast("Erreur");return}toast("Supprimée");closeSheet();shopData=null;shopView()};
+  });
+}
+document.addEventListener("click",e=>{const t=e.target.closest("[data-shop]");if(t&&t.dataset.shop){e.preventDefault();openShop(t.dataset.shop)}});
 /* préparation : refuse > 2 min, compresse si besoin pour rester sous 20 Mo */
 const VMAX=120,VBYTES=19*1024*1024;
 function vmeta(file){return new Promise((ok,ko)=>{const v=document.createElement("video");v.preload="metadata";v.muted=true;v.playsInline=true;v.onloadedmetadata=()=>{const r={d:v.duration,w:v.videoWidth,h:v.videoHeight};URL.revokeObjectURL(v.src);ok(r)};v.onerror=()=>ko(new Error("Vidéo illisible"));v.src=URL.createObjectURL(file)})}
