@@ -146,6 +146,15 @@ body.vmode header{display:none}
 @media(max-width:480px){.vmute{right:14px}}
 .vtop{position:fixed;top:14px;left:calc(50% - 240px + 16px);z-index:27;color:#fff;font-weight:800;font-size:17px;text-shadow:0 1px 6px #000}
 @media(max-width:480px){.vtop{left:16px}}
+.vrail{position:absolute;right:8px;bottom:120px;display:flex;flex-direction:column;gap:14px;align-items:center;z-index:3}
+.vr{display:flex;flex-direction:column;align-items:center;gap:2px;font-size:26px;color:#fff;filter:drop-shadow(0 2px 5px #000a);line-height:1}
+.vr small{font-size:11px;font-weight:700;color:#fff}
+.vr.liked{color:#ff3b5c}
+.vr.fol{width:46px;height:46px;border-radius:50%;background:#e8b23a;color:#111;font-size:22px;font-weight:900;justify-content:center;filter:none}
+.vr.fol.on{background:#fff3;color:#fff}
+.vinfo{padding-right:74px!important}
+.vobtn{display:block;width:100%;background:#e8b23a;color:#111;font-weight:800;border-radius:14px;padding:12px;margin-top:6px}
+.sp-img{width:100%;height:100%;object-fit:cover;border-radius:50%}
 /* page boutique */
 .sp-cover{height:120px;background:radial-gradient(120% 140% at 100% 0,#e8b23a88,transparent 60%),linear-gradient(135deg,#2a2412,#0f0f10);position:relative}
 .sp-back{position:absolute;top:12px;left:12px}
@@ -254,11 +263,11 @@ const sbc=window.supabase?window.supabase.createClient(SB_URL,SB_KEY,{auth:{stor
 const emailOf=p=>String(p).replace(/\D/g,"")+"@clients.odashop.app";
 function applySession(s){
   if(s&&s.user){const m=s.user.user_metadata||{};uid=s.user.id;user={name:m.name||"Client",phone:m.phone||""}}
-  else{uid=null;user=null}
+  else{uid=null;user=null;myLikes=new Set();myFollows=new Set()}
 }
 async function initAuth(){
   try{if(sbc){const {data}=await sbc.auth.getSession();applySession(data.session)}}catch(e){}
-  render();
+  loadMine();render();
 }
 let banners=[{t:"Achetez, vendez, on vous livre",s:"Boutique neuve, occasion et services · Paiement à la livraison",e:"🚚",btn:"",img:"",target:""}],slideTimer=null;
 let prods={neuf:[],occ:[]},services=demoServices,cities=["Agadez","Niamey","Zinder","Maradi","Tahoua","Arlit","Dosso"];
@@ -275,13 +284,13 @@ async function loadRemote(){
       sbc.from("settings").select("*")]);
     if(p.error)throw p.error;
     const g=["#e8b23a,#4a3510","#38bdf8,#0c3550","#8b5cf6,#2a1856","#22c55e,#0f3d20"],m={neuf:[],occ:[]};
-    const shR=await sbc.from("shops").select("id,name,description,city,phone,owner_id,status");const shM=Object.fromEntries((shR.data||[]).map(z=>[z.id,z.name]));shopsMap=Object.fromEntries((shR.data||[]).map(z=>[z.id,z]));
+    const shR=await sbc.from("shops").select("id,name,description,city,owner_id,status,followers_count,logo_url,cover_url");const shM=Object.fromEntries((shR.data||[]).map(z=>[z.id,z.name]));shopsMap=Object.fromEntries((shR.data||[]).map(z=>[z.id,z]));
     p.data.forEach((x,k)=>m[x.section=="neuf"?"neuf":"occ"].push({id:x.id,sid:x.shop_id,shop:shM[x.shop_id]||"",n:x.name,p:Number(x.price).toLocaleString("fr-FR"),e:"📦",img:x.image_url,c:x.category||"Divers",g:g[k%4]}));
     prods=m;
     try{
       const vr=await sbc.from("videos").select("*").order("created_at",{ascending:false}).limit(40);
       const all=[...m.neuf,...m.occ];
-      vids=(vr.data||[]).filter(v=>v.active&&v.status=="approuve").map(v=>({id:v.id,sid:v.shop_id,fid:v.telegram_file_id,shop:v.shop_name||"",cap:v.caption||"",prod:all.find(p=>p.id==v.product_id)||null}));
+      vids=(vr.data||[]).filter(v=>v.active&&v.status=="approuve").map(v=>({id:v.id,likes:v.likes_count||0,sid:v.shop_id,fid:v.telegram_file_id,shop:v.shop_name||"",cap:v.caption||"",prod:all.find(p=>p.id==v.product_id)||null}));
     }catch(e){vids=[]}
     if(s.data&&s.data.length)services=s.data.map(x=>({slug:x.slug,k:x.label,t:x.title,s:x.subtitle||"",i:x.icon||"🧰",cta:x.cta||"Commander",img:x.image_url||"",items:(i.data||[]).filter(y=>y.service_id==x.id).map(y=>({name:y.name,description:y.description||"",price:Number(y.price)||0,img:y.image_url||""}))}));
     if(c.data&&c.data.length)cities=c.data.map(x=>x.name);
@@ -466,7 +475,7 @@ function authSheet(mode){
       }
       const {data,error}=await sbc.auth.signInWithPassword({email:emailOf(phone),password:pw});
       if(error){toast("Numéro ou mot de passe incorrect");btn.disabled=false;return}
-      applySession(data.session);closeSheet();render();toast("Bienvenue "+user.name+" 👋");
+      applySession(data.session);closeSheet();loadMine();render();toast("Bienvenue "+user.name+" 👋");
     }catch(e){toast("Erreur réseau, réessayez");btn.disabled=false}
   };
 }
@@ -552,14 +561,16 @@ function sellerProduct(shop,p){
 let vids=[],vmuted=true,vObs=null;
 const vurl=id=>SB_URL+"/functions/v1/tg-video?id="+encodeURIComponent(id);
 function stopVids(){if(vObs){vObs.disconnect();vObs=null}document.querySelectorAll("#view video").forEach(v=>{try{v.pause()}catch(e){}})}
-function feedHTML(list){return list.map((v,i)=>`<section class="vi paused" data-i="${i}"><video playsinline loop preload="none" ${vmuted?"muted":""} data-id="${esc(v.fid)}"></video><div class="vplay">▶</div><div class="vinfo"><button data-shop="${v.sid||""}" style="color:#fff;font-weight:800;font-size:15px;text-align:left">🏪 ${esc(v.shop||"ODA Shop")} ›</button>${v.cap?`<p>${esc(v.cap)}</p>`:""}${v.prod?`<div class="vprod"><div><b>${esc(v.prod.n)}</b><span>${v.prod.p} F</span></div><button data-a="${i}">Commander</button></div>`:""}</div></section>`).join("")}
+function feedHTML(list){return list.map((v,i)=>`<section class="vi paused" data-i="${i}"><video playsinline loop preload="none" ${vmuted?"muted":""} data-id="${esc(v.fid)}"></video><div class="vplay">▶</div><div class="vinfo"><button data-shop="${v.sid||""}" style="color:#fff;font-weight:800;font-size:15px;text-align:left">🏪 ${esc(v.shop||"ODA Shop")} ›</button>${v.cap?`<p>${esc(v.cap)}</p>`:""}${v.prod?`<div class="vprod"><div><b>${esc(v.prod.n)}</b><span>${v.prod.p} F</span></div></div>`:""}<button class="vobtn" data-ord="${i}">🛒 Commander${v.prod?" · "+v.prod.p+" F":""}</button></div><div class="vrail">${v.sid?`<button class="vr fol ${myFollows.has(v.sid)?"on":""}" data-fol="${v.sid}">${myFollows.has(v.sid)?"✓":"+"}</button>`:""}<button class="vr ${myLikes.has(v.id)?"liked":""}" data-lk="${i}">❤<small>${v.likes||0}</small></button></div></section>`).join("")}
 function bindFeed(vf,list){
   vf.querySelectorAll(".vi").forEach(sec=>{
     const v=sec.querySelector("video");
     v.onplay=()=>sec.classList.remove("paused");v.onpause=()=>sec.classList.add("paused");
     sec.onclick=e=>{if(e.target.closest("button"))return;v.paused?v.play().catch(()=>{}):v.pause()};
   });
-  vf.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const p=list[b.dataset.a].prod;cart.push({n:p.n,p:p.p});cartUI();toast("Ajouté ✓")});
+  vf.querySelectorAll("[data-ord]").forEach(b=>b.onclick=()=>orderVideo(list[b.dataset.ord]));
+  vf.querySelectorAll("[data-lk]").forEach(b=>b.onclick=()=>toggleLike(list[b.dataset.lk],b));
+  vf.querySelectorAll("[data-fol]").forEach(b=>b.onclick=()=>toggleFollow(b.dataset.fol));
   if(vObs)vObs.disconnect();
   vObs=new IntersectionObserver(es=>es.forEach(en=>{
     const v=en.target.querySelector("video");
@@ -582,6 +593,73 @@ function openViewer(list,idx){
   vf.scrollTop=idx*vf.clientHeight;
 }
 function closeViewer(){const d=$("#vv");if(d){d.querySelectorAll("video").forEach(v=>{try{v.pause();v.removeAttribute("src");v.load()}catch(e){}});d.remove()}if(vObs){vObs.disconnect();vObs=null}}
+
+/* ---------- J'aime, abonnements, commande ---------- */
+let myLikes=new Set(),myFollows=new Set();
+async function loadMine(){
+  if(!uid||!sbc)return;
+  try{
+    const [l,f]=await Promise.all([sbc.from("video_likes").select("video_id"),sbc.from("shop_follows").select("shop_id")]);
+    myLikes=new Set((l.data||[]).map(x=>x.video_id));myFollows=new Set((f.data||[]).map(x=>x.shop_id));
+  }catch(e){}
+}
+function needLogin(){authSheet();toast("Connectez-vous pour continuer");}
+async function toggleLike(v,btn){
+  if(!uid){needLogin();return}
+  const on=myLikes.has(v.id);
+  on?myLikes.delete(v.id):myLikes.add(v.id);v.likes=Math.max(0,(v.likes||0)+(on?-1:1));
+  btn.classList.toggle("liked",!on);btn.querySelector("small").textContent=v.likes;
+  const {error}=on?await sbc.from("video_likes").delete().eq("video_id",v.id).eq("user_id",uid):await sbc.from("video_likes").insert({video_id:v.id});
+  if(error){on?myLikes.add(v.id):myLikes.delete(v.id);v.likes=Math.max(0,(v.likes||0)+(on?1:-1));btn.classList.toggle("liked",on);btn.querySelector("small").textContent=v.likes;toast("Erreur, réessayez")}
+}
+async function toggleFollow(sid){
+  if(!uid){needLogin();return}
+  const sh=shopsMap[sid];if(sh&&sh.owner_id==uid){toast("C'est votre boutique");return}
+  const on=myFollows.has(sid);
+  on?myFollows.delete(sid):myFollows.add(sid);
+  if(sh)sh.followers_count=Math.max(0,(sh.followers_count||0)+(on?-1:1));
+  document.querySelectorAll(`[data-fol="${sid}"].vr`).forEach(b=>{b.classList.toggle("on",!on);b.textContent=!on?"✓":"+"});
+  const {error}=on?await sbc.from("shop_follows").delete().eq("shop_id",sid).eq("user_id",uid):await sbc.from("shop_follows").insert({shop_id:sid});
+  if(error){on?myFollows.add(sid):myFollows.delete(sid);if(sh)sh.followers_count=Math.max(0,(sh.followers_count||0)+(on?1:-1));document.querySelectorAll(`[data-fol="${sid}"].vr`).forEach(b=>{b.classList.toggle("on",on);b.textContent=on?"✓":"+"});toast("Erreur, réessayez");return}
+  toast(on?"Abonnement retiré":"Vous suivez cette boutique ✓");
+}
+function orderVideo(v){
+  if(v.prod){cart.push({n:v.prod.n,p:v.prod.p});cartUI();toast("Ajouté au panier ✓");return}
+  // toute commande passe par ODA Shop (panier), jamais directement par le vendeur
+  cart.push({n:(v.shop?v.shop+" : ":"")+(v.cap||"article de la vidéo"),p:"Sur devis"});cartUI();toast("Ajouté au panier ✓");
+}
+function followedSheet(){
+  if(!uid){needLogin();return}
+  const l=[...myFollows].map(id=>shopsMap[id]).filter(Boolean);
+  openSheet(`<h3>Boutiques suivies</h3>`+(l.length?l.map(x=>`<div class="li" data-shop="${x.id}" style="cursor:pointer"><div>🏪 ${esc(x.name)}<small>${esc(x.city||"")} · ${x.followers_count||0} abonné(s)</small></div><span class="go">Ouvrir</span></div>`).join(""):'<p class="s" style="margin-top:12px">Vous ne suivez aucune boutique pour le moment. Touchez + sur une vidéo ou une page boutique.</p>'));
+}
+/* ---------- Logo et couverture de la boutique ---------- */
+async function upImage(file){
+  const {data:{session}}=await sbc.auth.getSession();
+  const fd=new FormData();fd.append("file",file);
+  const r=await fetch(SB_URL+"/functions/v1/tg-upload",{method:"POST",headers:{Authorization:"Bearer "+session.access_token,apikey:SB_KEY},body:fd});
+  const j=await r.json().catch(()=>({}));
+  if(!r.ok||!j.file_id)throw new Error(j.error||r.status);
+  return {fid:j.file_id,url:SB_URL+"/functions/v1/tg-image?id="+encodeURIComponent(j.file_id)};
+}
+function shopImagesSheet(sh){
+  const st={logo:{fid:sh.logo_file_id||null,url:sh.logo_url||""},cover:{fid:sh.cover_file_id||null,url:sh.cover_url||""}};
+  openSheet(`<h3>✏️ Ma boutique</h3><p class="s">Ajoutez un logo et une photo de couverture.</p>
+  <label class="lb">Logo (carré)</label><div style="display:flex;gap:12px;align-items:center;margin-top:6px"><div id="lp" style="width:72px;height:72px;border-radius:50%;background:var(--card);overflow:hidden;display:grid;place-items:center;font-size:26px">${st.logo.url?`<img class="sp-img" src="${esc(st.logo.url)}">`:"🏪"}</div><input type="file" id="lf" accept="image/*" hidden><button class="go" id="lb" style="background:none;border:1px solid var(--line);color:var(--txt)">Choisir</button><span id="ls" style="font-size:12px;color:var(--mut)"></span></div>
+  <label class="lb">Photo de couverture (large)</label><div style="display:flex;gap:12px;align-items:center;margin-top:6px"><div id="cp" style="width:120px;height:64px;border-radius:12px;background:var(--card);overflow:hidden;display:grid;place-items:center;font-size:24px">${st.cover.url?`<img src="${esc(st.cover.url)}" style="width:100%;height:100%;object-fit:cover">`:"🖼️"}</div><input type="file" id="cf" accept="image/*" hidden><button class="go" id="cb" style="background:none;border:1px solid var(--line);color:var(--txt)">Choisir</button><span id="cs" style="font-size:12px;color:var(--mut)"></span></div>
+  <button class="btn" id="ssv">Enregistrer</button><button class="btn o" id="sbk2">Annuler</button>`);
+  const bind=(b,f,stt,key,prev,round)=>{$(b).onclick=()=>$(f).click();$(f).onchange=async e=>{const file=e.target.files[0];if(!file)return;$(stt).textContent="Envoi…";
+    try{const r=await upImage(file);st[key]=r;$(prev).innerHTML=`<img ${round?'class="sp-img"':'style="width:100%;height:100%;object-fit:cover"'} src="${URL.createObjectURL(file)}">`;$(stt).textContent="✓"}catch(x){$(stt).textContent="Erreur : "+x.message}}};
+  bind("#lb","#lf","#ls","logo","#lp",true);bind("#cb","#cf","#cs","cover","#cp",false);
+  $("#sbk2").onclick=closeSheet;
+  $("#ssv").onclick=async()=>{
+    $("#ssv").disabled=true;
+    const {error}=await sbc.rpc("update_my_shop_images",{p_logo_url:st.logo.url||null,p_logo_fid:st.logo.fid,p_cover_url:st.cover.url||null,p_cover_fid:st.cover.fid});
+    if(error){toast("Erreur, réessayez");$("#ssv").disabled=false;return}
+    Object.assign(sh,{logo_url:st.logo.url||null,logo_file_id:st.logo.fid,cover_url:st.cover.url||null,cover_file_id:st.cover.fid});shopsMap[sh.id]=sh;
+    closeSheet();toast("Boutique mise à jour ✓");shopView();
+  };
+}
 /* ---------- Page boutique ---------- */
 let shopsMap={},curShop=null,shopTab="prod",shopData=null,prevTab="home";
 async function openShop(id,row){
@@ -603,13 +681,12 @@ async function shopView(){
     shopData={p:(p.data||[]).filter(x=>mine||x.active),v:(v.data||[]).filter(x=>mine||(x.active&&x.status=="approuve"))};
   }
   const P=shopData.p,V=shopData.v,pubV=V.filter(x=>x.active&&x.status=="approuve");
-  const ph=String(sh.phone||"").replace(/\D/g,"");
-  const vlist=pubV.map(v=>({id:v.id,fid:v.telegram_file_id,sid:v.shop_id,shop:sh.name,cap:v.caption||"",prod:(()=>{const p=P.find(z=>z.id==v.product_id);return p?{n:p.name,p:Number(p.price).toLocaleString("fr-FR")}:null})()}));
-  $("#view").innerHTML=`<div class="sp-cover"><button class="ib sp-back" id="sbk" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button></div>
-  <div class="sp-head"><div class="sp-av">${esc((sh.name||"?").trim().charAt(0).toUpperCase())}</div>
+  const vlist=pubV.map(v=>({id:v.id,likes:v.likes_count||0,fid:v.telegram_file_id,sid:v.shop_id,shop:sh.name,cap:v.caption||"",prod:(()=>{const p=P.find(z=>z.id==v.product_id);return p?{n:p.name,p:Number(p.price).toLocaleString("fr-FR")}:null})()}));
+  $("#view").innerHTML=`<div class="sp-cover" ${sh.cover_url?`style="background:linear-gradient(#0002,#0007),url('${esc(sh.cover_url)}') center/cover"`:""}><button class="ib sp-back" id="sbk" aria-label="Retour"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button></div>
+  <div class="sp-head"><div class="sp-av">${sh.logo_url?`<img class="sp-img" src="${esc(sh.logo_url)}" alt="">`:esc((sh.name||"?").trim().charAt(0).toUpperCase())}</div>
    <h1>${esc(sh.name)}</h1><p>${esc(sh.city||"")}${sh.description?" · "+esc(sh.description):""}</p>
-   <div class="sp-stats"><div><b>${P.filter(x=>x.active).length}</b><span>Produits</span></div><div><b>${pubV.length}</b><span>Vidéos</span></div></div>
-   <div class="sp-act">${mine?`<button class="btn" id="sap">+ Produit</button><button class="btn" id="sav">🎬 Vidéo</button>`:""}${ph?`<a class="btn ${mine?"o":""}" href="tel:+${ph}">📞 Appeler</a><a class="btn o" target="_blank" rel="noopener" href="${wa("Bonjour, je vous contacte depuis ODA Shop (boutique « "+sh.name+" »).")}">WhatsApp</a>`:""}</div></div>
+   <div class="sp-stats"><div><b>${P.filter(x=>x.active).length}</b><span>Produits</span></div><div><b>${pubV.length}</b><span>Vidéos</span></div><div><b id="nfol">${sh.followers_count||0}</b><span>Abonnés</span></div><div><b>${pubV.reduce((a,x)=>a+(x.likes_count||0),0)}</b><span>J'aime</span></div></div>
+   <div class="sp-act">${mine?`<button class="btn" id="sap">+ Produit</button><button class="btn" id="sav">🎬 Vidéo</button><button class="btn o" id="sed">✏️ Boutique</button>`:`<button class="btn ${myFollows.has(sh.id)?"o":""}" id="sfo">${myFollows.has(sh.id)?"✓ Abonné":"+ Suivre"}</button>`}</div></div>
   <div class="sp-tabs"><button data-st="prod" class="${shopTab=="prod"?"on":""}">🛍️ Produits</button><button data-st="vid" class="${shopTab=="vid"?"on":""}">🎬 Vidéos</button></div>
   <main style="padding-top:12px">${shopTab=="prod"?
    (P.length?`<div class="grid">${P.map((x,i)=>`<div class="pr" ${mine?`data-ep="${i}" style="cursor:pointer"`:""}><div class="im" style="background:var(--tile)">${x.image_url?`<img src="${esc(x.image_url)}" alt="" loading="lazy" style="width:100%;height:100%;object-fit:cover">`:"📦"}</div><div class="in"><small>${x.section=="neuf"?"Neuf":"Occasion"} · ${esc(x.category||"")}${mine?" · "+bd(x.status):""}</small><h3>${esc(x.name)}</h3><div class="rw"><span class="price">${Number(x.price).toLocaleString("fr-FR")} F</span>${!mine&&x.active?`<button class="add" data-n="${esc(x.name)}" data-p="${Number(x.price).toLocaleString("fr-FR")}">+</button>`:""}</div></div></div>`).join("")}</div>`:`<div class="empty">Aucun produit pour le moment.</div>`):
@@ -617,7 +694,7 @@ async function shopView(){
   <footer>© 2026 ODA Shop</footer></main>`;
   $("#sbk").onclick=()=>setTab(prevTab||"home");
   document.querySelectorAll("[data-st]").forEach(b=>b.onclick=()=>{shopTab=b.dataset.st;shopView()});
-  if(mine){$("#sap").onclick=()=>sellerProduct(sh);$("#sav").onclick=()=>videoSheet(sh)}
+  if(mine){$("#sap").onclick=()=>sellerProduct(sh);$("#sav").onclick=()=>videoSheet(sh);$("#sed").onclick=()=>shopImagesSheet(sh)}else $("#sfo").onclick=async()=>{await toggleFollow(sh.id);shopView()};
   document.querySelectorAll("#view .add").forEach(b=>b.onclick=()=>{cart.push({n:b.dataset.n,p:b.dataset.p});cartUI();toast("Ajouté ✓")});
   document.querySelectorAll("[data-ep]").forEach(c=>c.onclick=()=>sellerProduct(sh,P[c.dataset.ep]));
   document.querySelectorAll("[data-v]").forEach(c=>c.onclick=()=>{
@@ -705,6 +782,7 @@ $("#menu").onclick=()=>openSheet(`<h3>Menu</h3>
   <div class="li"><div>${user?esc(user.name):"Non connecté"}<small>${user?esc(user.phone||"Compte ODA Shop"):"Créez un compte pour profiter de tout"}</small></div>${user?'<button class="go" id="lo">Déconnexion</button>':'<button class="go" onclick="authSheet()">Créer</button>'}</div>
   <div class="li"><div>Apparence<small>${theme=="dark"?"Mode sombre":"Mode clair"}</small></div><button class="go" onclick="toggleTheme()">${theme=="dark"?"Passer en clair":"Passer en sombre"}</button></div>
   <div class="li"><div>Ma boutique<small>Vendre vos produits sur ODA Shop</small></div><button class="go" onclick="shopSheet()">Ouvrir</button></div>
+  <div class="li"><div>Boutiques suivies<small>${myFollows.size} boutique(s)</small></div><button class="go" onclick="followedSheet()">Voir</button></div>
   <div class="li"><div>Ville<small>${esc(city)}</small></div><button class="go" onclick="citySheet()">Changer</button></div>
   <div class="li"><div>Nous contacter<small>WhatsApp et appel</small></div><a class="go" target="_blank" rel="noopener" href="${wa("Bonjour ODA Shop")}">WhatsApp</a></div>`);
 document.addEventListener("click",e=>{if(e.target.id=="lo"){(async()=>{try{await sbc.auth.signOut()}catch(x){}applySession(null);closeSheet();render()})()}});
