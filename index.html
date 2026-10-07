@@ -128,6 +128,24 @@ nav .fab{flex:none;width:54px;height:54px;padding:0;border-radius:50%;background
 .bd.ok{background:#22c55e22;color:#22c55e}.bd.no{background:#ef444422;color:#ef4444}
 .lb{display:block;font-size:12px;color:var(--mut);margin-top:12px}
 .greet b span,.price,.why b,.chip.on,.btn.o,.ib,nav button.on{color:var(--gt)}
+/* vidéos */
+body.vmode header{display:none}
+.vfeed{position:fixed;top:0;bottom:74px;left:50%;transform:translateX(-50%);width:100%;max-width:480px;overflow-y:auto;scroll-snap-type:y mandatory;background:#000;z-index:25;scrollbar-width:none}
+.vfeed::-webkit-scrollbar{display:none}
+.vi{height:100%;scroll-snap-align:start;scroll-snap-stop:always;position:relative;background:#000;color:#fff}
+.vi video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;background:#000}
+.vplay{position:absolute;inset:0;display:none;place-items:center;font-size:64px;color:#fff9;pointer-events:none}
+.vi.paused .vplay{display:grid}
+.vinfo{position:absolute;left:0;right:0;bottom:0;padding:60px 16px 16px;background:linear-gradient(transparent,#000c);pointer-events:none}
+.vinfo>*{pointer-events:auto}
+.vinfo p{font-size:14px;margin:4px 0 8px;line-height:1.35}
+.vprod{display:flex;align-items:center;justify-content:space-between;gap:10px;background:#000a;border:1px solid #fff3;border-radius:14px;padding:10px 12px}
+.vprod div{display:flex;flex-direction:column;font-size:13px}.vprod span{color:#e8b23a;font-weight:800}
+.vprod button{background:#e8b23a;color:#111;font-weight:800;font-size:12px;border-radius:10px;padding:9px 13px;white-space:nowrap}
+.vmute{position:fixed;top:14px;right:calc(50% - 240px + 14px);z-index:27;width:40px;height:40px;border-radius:50%;background:#0008;color:#fff;font-size:18px}
+@media(max-width:480px){.vmute{right:14px}}
+.vtop{position:fixed;top:14px;left:calc(50% - 240px + 16px);z-index:27;color:#fff;font-weight:800;font-size:17px;text-shadow:0 1px 6px #000}
+@media(max-width:480px){.vtop{left:16px}}
 .toast{position:fixed;bottom:150px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--txt);color:var(--bg);box-shadow:0 6px 20px #0003;padding:10px 16px;border-radius:12px;font-size:13px;font-weight:600;opacity:0;transition:.3s;z-index:70;pointer-events:none}
 .toast.show{opacity:1;transform:translateX(-50%)}
 </style>
@@ -150,7 +168,8 @@ nav .fab{flex:none;width:54px;height:54px;padding:0;border-radius:50%;background
   <div id="cartbar"><span id="cartTxt"></span><span>Commander ›</span></div>
   <nav id="nav">
     <button data-t="home"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></svg>Accueil</button>
-    <div class="fabw"><button class="fab" id="fab" aria-label="Publier un produit">+</button></div>
+    <button data-t="vid"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><rect x="3" y="5" width="18" height="14" rx="3"/><path d="M10 9.5v5l4.5-2.5z"/></svg>Vidéos</button>
+    <div class="fabw"><button class="fab" id="fab" aria-label="Publier">+</button></div>
     <button data-t="msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round"><path d="M21 12a8 8 0 0 1-11.6 7.1L3 21l1.9-5.4A8 8 0 1 1 21 12z"/></svg>Messages</button>
   </nav>
 </div>
@@ -236,8 +255,13 @@ async function loadRemote(){
     if(p.error)throw p.error;
     const g=["#e8b23a,#4a3510","#38bdf8,#0c3550","#8b5cf6,#2a1856","#22c55e,#0f3d20"],m={neuf:[],occ:[]};
     const shR=await sbc.from("shops").select("id,name");const shM=Object.fromEntries((shR.data||[]).map(z=>[z.id,z.name]));
-    p.data.forEach((x,k)=>m[x.section=="neuf"?"neuf":"occ"].push({shop:shM[x.shop_id]||"",n:x.name,p:Number(x.price).toLocaleString("fr-FR"),e:"📦",img:x.image_url,c:x.category||"Divers",g:g[k%4]}));
+    p.data.forEach((x,k)=>m[x.section=="neuf"?"neuf":"occ"].push({id:x.id,shop:shM[x.shop_id]||"",n:x.name,p:Number(x.price).toLocaleString("fr-FR"),e:"📦",img:x.image_url,c:x.category||"Divers",g:g[k%4]}));
     prods=m;
+    try{
+      const vr=await sbc.from("videos").select("*").order("created_at",{ascending:false}).limit(40);
+      const all=[...m.neuf,...m.occ];
+      vids=(vr.data||[]).filter(v=>v.active&&v.status=="approuve").map(v=>({id:v.id,fid:v.telegram_file_id,shop:v.shop_name||"",cap:v.caption||"",prod:all.find(p=>p.id==v.product_id)||null}));
+    }catch(e){vids=[]}
     if(s.data&&s.data.length)services=s.data.map(x=>({slug:x.slug,k:x.label,t:x.title,s:x.subtitle||"",i:x.icon||"🧰",cta:x.cta||"Commander",img:x.image_url||"",items:(i.data||[]).filter(y=>y.service_id==x.id).map(y=>({name:y.name,description:y.description||"",price:Number(y.price)||0,img:y.image_url||""}))}));
     if(c.data&&c.data.length)cities=c.data.map(x=>x.name);
     const set=Object.fromEntries((st.data||[]).map(x=>[x.key,x.value]));
@@ -257,11 +281,11 @@ function header(){
   $("#call").href="tel:+"+WA;
   $("#greet").innerHTML=user?`<b>Bienvenue <span>${esc(user.name)}</span></b><small>${esc(city)}</small>`:`<button class="login" onclick="authSheet()">Créer mon compte</button>`;
 }
-function setTab(t){clearInterval(chatTimer);clearInterval(slideTimer);tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));render();scrollTo(0,0)}
+function setTab(t){stopVids();document.body.classList.toggle('vmode',t=='vid');clearInterval(chatTimer);clearInterval(slideTimer);tab=t;document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==t));render();scrollTo(0,0)}
 document.querySelectorAll("nav button[data-t]").forEach(b=>b.onclick=()=>setTab(b.dataset.t));
 $("#fab").onclick=()=>sellFlow();
 
-function render(){header();({home,msg,svc,service:serviceView})[tab]()}
+function render(){header();({home,msg,svc,service:serviceView,vid:vidView})[tab]()}
 const pf=p=>/\d/.test(String(p))?p+" F":p;
 
 function home(){
@@ -346,7 +370,9 @@ async function sellFlow(){
   openSheet('<h3>Publier un produit</h3><p class="s">Chargement…</p>');
   const {data:shop,error}=await sbc.from("shops").select("*").eq("owner_id",uid).maybeSingle();
   if(error){openSheet('<h3>Publier un produit</h3><p class="s">Erreur de chargement, réessayez.</p>');return}
-  if(shop&&shop.status=="approuvee"){sellerProduct(shop);return}
+  if(shop&&shop.status=="approuvee"){
+    openSheet(`<h3>Publier</h3><p class="s">Que voulez-vous publier ?</p><button class="btn" id="m1">📦 Un produit</button><button class="btn" id="m2">🎬 Une vidéo</button><button class="btn o" id="m3">🏪 Ma boutique</button>`);
+    $("#m1").onclick=()=>sellerProduct(shop);$("#m2").onclick=()=>videoSheet(shop);$("#m3").onclick=shopSheet;return}
   shopSheet();
 }
 function svc(){
@@ -455,8 +481,10 @@ async function shopSheet(){
   const {data:ps}=await sbc.from("products").select("*").eq("shop_id",shop.id).order("created_at",{ascending:false});
   openSheet(`<h3>🏪 ${esc(shop.name)}</h3><p class="s">${bd("approuvee")} · Chaque produit est publié après validation par ODA Shop.</p>
   <button class="btn" id="np">+ Ajouter un produit</button>
+  <button class="btn o" id="nv">🎬 Publier une vidéo</button>
   ${(ps||[]).map(p=>`<div class="li" data-p="${p.id}" style="cursor:pointer"><div>${esc(p.name)}<small>${Number(p.price).toLocaleString("fr-FR")} F · stock ${p.stock}${p.reject_reason?" · "+esc(p.reject_reason):""}</small></div>${bd(p.status)}</div>`).join("")||'<p class="s" style="margin-top:14px">Aucun produit pour le moment.</p>'}`);
   $("#np").onclick=()=>sellerProduct(shop);
+  $("#nv").onclick=()=>videoSheet(shop);
   document.querySelectorAll("[data-p]").forEach(r=>r.onclick=()=>sellerProduct(shop,(ps||[]).find(p=>p.id==r.dataset.p)));
 }
 function sellerProduct(shop,p){
@@ -496,6 +524,100 @@ function sellerProduct(shop,p){
     toast("Produit envoyé, en attente de validation ✓");shopSheet();
   };
   if(e)$("#dl").onclick=async()=>{if(!confirm("Supprimer ce produit ?"))return;const {error}=await sbc.from("products").delete().eq("id",p.id);if(error){toast("Erreur");return}toast("Supprimé");shopSheet()};
+}
+
+/* ---------- Vidéos courtes ---------- */
+let vids=[],vmuted=true,vObs=null;
+const vurl=id=>SB_URL+"/functions/v1/tg-video?id="+encodeURIComponent(id);
+function stopVids(){if(vObs){vObs.disconnect();vObs=null}document.querySelectorAll("#view video").forEach(v=>{try{v.pause()}catch(e){}})}
+function vidView(){
+  $("#view").innerHTML=`<div class="vtop">Vidéos</div><div class="vfeed" id="vf">${vids.length?vids.map((v,i)=>`<section class="vi paused" data-i="${i}"><video playsinline loop preload="none" ${vmuted?"muted":""} data-id="${esc(v.fid)}"></video><div class="vplay">▶</div><div class="vinfo"><b>🏪 ${esc(v.shop||"ODA Shop")}</b>${v.cap?`<p>${esc(v.cap)}</p>`:""}${v.prod?`<div class="vprod"><div><b>${esc(v.prod.n)}</b><span>${v.prod.p} F</span></div><button data-a="${i}">Commander</button></div>`:""}</div></section>`).join(""):`<div style="color:#fff;text-align:center;margin-top:38vh;padding:0 30px;line-height:1.6">🎬<br><b>Aucune vidéo pour le moment</b><br><span style="color:#bbb;font-size:13px">Les vendeurs peuvent en publier avec le bouton +.</span></div>`}</div><button class="vmute" id="vm" aria-label="Son">${vmuted?"🔇":"🔊"}</button>`;
+  const vf=$("#vf");
+  $("#vm").onclick=()=>{vmuted=!vmuted;$("#vm").textContent=vmuted?"🔇":"🔊";document.querySelectorAll(".vi video").forEach(v=>v.muted=vmuted)};
+  vf.querySelectorAll(".vi").forEach(sec=>{
+    const v=sec.querySelector("video");
+    v.onplay=()=>sec.classList.remove("paused");v.onpause=()=>sec.classList.add("paused");
+    sec.onclick=e=>{if(e.target.closest("button"))return;v.paused?v.play().catch(()=>{}):v.pause()};
+  });
+  vf.querySelectorAll("[data-a]").forEach(b=>b.onclick=()=>{const p=vids[b.dataset.a].prod;cart.push({n:p.n,p:p.p});cartUI();toast("Ajouté ✓")});
+  vObs=new IntersectionObserver(es=>es.forEach(en=>{
+    const v=en.target.querySelector("video");
+    if(en.isIntersecting){if(!v.src)v.src=vurl(v.dataset.id);v.muted=vmuted;v.play().catch(()=>{})}else{v.pause()}
+  }),{root:vf,threshold:.65});
+  vf.querySelectorAll(".vi").forEach(x=>vObs.observe(x));
+}
+/* préparation : refuse > 2 min, compresse si besoin pour rester sous 20 Mo */
+const VMAX=120,VBYTES=19*1024*1024;
+function vmeta(file){return new Promise((ok,ko)=>{const v=document.createElement("video");v.preload="metadata";v.muted=true;v.playsInline=true;v.onloadedmetadata=()=>{const r={d:v.duration,w:v.videoWidth,h:v.videoHeight};URL.revokeObjectURL(v.src);ok(r)};v.onerror=()=>ko(new Error("Vidéo illisible"));v.src=URL.createObjectURL(file)})}
+async function prepareVideo(file,onp){
+  const m=await vmeta(file);
+  if(!isFinite(m.d)||m.d<=0)throw new Error("Vidéo illisible");
+  if(m.d>VMAX+1)throw new Error("Vidéo trop longue (2 minutes maximum)");
+  const okType=/^video\/(mp4|webm)/.test(file.type);
+  if(okType&&file.size<=VBYTES)return {file,dur:Math.round(m.d)};
+  if(!window.MediaRecorder||!HTMLCanvasElement.prototype.captureStream)throw new Error("Vidéo trop lourde (20 Mo max) et ce navigateur ne peut pas la compresser");
+  const mime=["video/mp4;codecs=avc1","video/mp4","video/webm;codecs=vp9,opus","video/webm;codecs=vp8,opus","video/webm"].find(t=>MediaRecorder.isTypeSupported(t));
+  if(!mime)throw new Error("Compression impossible sur ce navigateur");
+  const sc=Math.min(1,854/Math.max(m.w,m.h));
+  const W=Math.round(m.w*sc/2)*2,H=Math.round(m.h*sc/2)*2;
+  const cv=document.createElement("canvas");cv.width=W;cv.height=H;const cx=cv.getContext("2d");
+  const v=document.createElement("video");v.playsInline=true;v.src=URL.createObjectURL(file);
+  await new Promise((ok,ko)=>{v.onloadeddata=ok;v.onerror=()=>ko(new Error("Vidéo illisible"))});
+  const out=cv.captureStream(30);
+  let ac=null;
+  try{ac=new (window.AudioContext||window.webkitAudioContext)();await ac.resume();const src=ac.createMediaElementSource(v),dst=ac.createMediaStreamDestination();src.connect(dst);dst.stream.getAudioTracks().forEach(t=>out.addTrack(t))}catch(e){}
+  const rec=new MediaRecorder(out,{mimeType:mime,videoBitsPerSecond:1000000,audioBitsPerSecond:64000});
+  const chunks=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
+  const done=new Promise(ok=>rec.onstop=ok);
+  let raf;const draw=()=>{cx.drawImage(v,0,0,W,H);onp&&onp(Math.min(99,Math.round(v.currentTime/m.d*100)));raf=v.requestVideoFrameCallback?v.requestVideoFrameCallback(draw):requestAnimationFrame(draw)};
+  v.onended=()=>rec.state!="inactive"&&rec.stop();
+  rec.start(1000);await v.play();draw();await done;
+  if(v.cancelVideoFrameCallback)v.cancelVideoFrameCallback(raf);cancelAnimationFrame(raf);
+  try{ac&&ac.close()}catch(e){}URL.revokeObjectURL(v.src);
+  const ext=mime.includes("mp4")?"mp4":"webm";
+  const blob=new Blob(chunks,{type:"video/"+ext});
+  if(blob.size>VBYTES+1024*1024)throw new Error("Vidéo encore trop lourde après compression, raccourcissez-la");
+  return {file:new File([blob],"video."+ext,{type:"video/"+ext}),dur:Math.round(m.d)};
+}
+function uploadWithProgress(file,token,onp){return new Promise(ok=>{
+  const x=new XMLHttpRequest();x.open("POST",SB_URL+"/functions/v1/tg-upload");
+  x.setRequestHeader("Authorization","Bearer "+token);x.setRequestHeader("apikey",SB_KEY);
+  x.upload.onprogress=e=>{if(e.lengthComputable)onp(Math.round(e.loaded/e.total*100))};
+  x.onload=()=>{let j={};try{j=JSON.parse(x.responseText)}catch(e){}ok({ok:x.status<300&&!!j.file_id,j,status:x.status})};
+  x.onerror=()=>ok({ok:false,j:{error:"Erreur réseau"},status:0});
+  const fd=new FormData();fd.append("file",file);x.send(fd)})}
+async function videoSheet(shop){
+  const {data:ps}=await sbc.from("products").select("id,name").eq("shop_id",shop.id).order("created_at",{ascending:false});
+  const {data:mv}=await sbc.from("videos").select("*").eq("shop_id",shop.id).order("created_at",{ascending:false});
+  let prep=null;
+  openSheet(`<h3>🎬 Publier une vidéo</h3><p class="s">Montrez votre article en vidéo (2 minutes maximum). Elle sera visible après validation par ODA Shop.</p>
+  <input type="file" id="vf" accept="video/*" hidden>
+  <button class="btn o" id="vp">🎥 Choisir ou filmer une vidéo</button><div id="vs" style="font-size:12px;color:var(--mut);margin-top:6px"></div>
+  <label class="lb">Légende</label><textarea class="fld" id="vc" rows="2" maxlength="200" placeholder="Ex : Canapé 3 places neuf, livraison possible"></textarea>
+  <label class="lb">Produit lié (facultatif)</label><select class="fld" id="vpr"><option value="">Aucun</option>${(ps||[]).map(p=>`<option value="${p.id}">${esc(p.name)}</option>`).join("")}</select>
+  <button class="btn" id="vsv">Publier la vidéo</button><button class="btn o" id="bk">Retour</button>
+  ${(mv||[]).length?`<h3 style="margin-top:22px;font-size:16px">Mes vidéos</h3>`+mv.map(v=>`<div class="li"><div>${esc(v.caption||"(sans légende)")}<small>${v.duration}s · ${(v.size_bytes/1048576).toFixed(1)} Mo</small></div><div style="display:flex;gap:6px;align-items:center">${bd(v.status)}<button class="go" data-d="${v.id}" style="background:none;border:1px solid #ef4444;color:#ef4444">✕</button></div></div>`).join(""):""}`);
+  $("#bk").onclick=shopSheet;
+  $("#vp").onclick=()=>$("#vf").click();
+  $("#vf").onchange=async ev=>{
+    const f=ev.target.files[0];if(!f)return;prep=null;$("#vsv").disabled=true;
+    $("#vs").textContent="Préparation de la vidéo… gardez l'écran allumé";
+    try{prep=await prepareVideo(f,p=>$("#vs")&&($("#vs").textContent="Compression… "+p+"% (gardez l'écran allumé)"));
+      $("#vs").textContent="Vidéo prête ✓ "+prep.dur+" s · "+(prep.file.size/1048576).toFixed(1)+" Mo"}
+    catch(e){$("#vs").textContent="⚠️ "+e.message}
+    $("#vsv").disabled=false;
+  };
+  $("#vsv").onclick=async()=>{
+    if(!prep){toast("Choisissez une vidéo");return}
+    $("#vsv").disabled=true;
+    const {data:{session}}=await sbc.auth.getSession();
+    const r=await uploadWithProgress(prep.file,session.access_token,p=>$("#vs")&&($("#vs").textContent="Envoi… "+p+"%"));
+    if(!r.ok){$("#vs").textContent="⚠️ "+(r.j.error||("Erreur "+r.status));$("#vsv").disabled=false;return}
+    const {error}=await sbc.from("videos").insert({shop_id:shop.id,product_id:$("#vpr").value||null,caption:$("#vc").value.trim(),telegram_file_id:r.j.file_id,duration:prep.dur,size_bytes:prep.file.size});
+    if(error){$("#vs").textContent="⚠️ Erreur, réessayez";$("#vsv").disabled=false;return}
+    toast("Vidéo envoyée, en attente de validation ✓");videoSheet(shop);
+  };
+  document.querySelectorAll("[data-d]").forEach(b=>b.onclick=async()=>{if(!confirm("Supprimer cette vidéo ?"))return;const {error}=await sbc.from("videos").delete().eq("id",b.dataset.d);if(error){toast("Erreur");return}toast("Supprimée");videoSheet(shop)});
 }
 $("#menu").onclick=()=>openSheet(`<h3>Menu</h3>
   <div class="li"><div>${user?esc(user.name):"Non connecté"}<small>${user?esc(user.phone||"Compte ODA Shop"):"Créez un compte pour profiter de tout"}</small></div>${user?'<button class="go" id="lo">Déconnexion</button>':'<button class="go" onclick="authSheet()">Créer</button>'}</div>
